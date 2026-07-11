@@ -11,7 +11,7 @@ import { saveResult, loadHistory, clearHistory } from "@/lib/history";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Screen = "scan" | "results";
-type Tab = "scan" | "history" | "about";
+type Tab = "scan" | "history";
 
 // ─── SVG icons (no extra deps) ────────────────────────────────────────────────
 
@@ -464,7 +464,6 @@ function BottomNav({
   const tabs: Array<{ id: Tab; label: string; icon: ReactNode }> = [
     { id: "scan", label: "Scan", icon: <IcScan /> },
     { id: "history", label: "History", icon: <IcHistory /> },
-    { id: "about", label: "About", icon: <IcInfo /> },
   ];
 
   return (
@@ -490,63 +489,6 @@ function BottomNav({
         <div className="w-28 h-1 rounded-full bg-white/10" />
       </div>
     </nav>
-  );
-}
-
-// ─── About screen ─────────────────────────────────────────────────────────────
-
-function AboutScreen() {
-  const steps = [
-    ["1", "Upload or scan a menu photo, PDF, or paste text"],
-    ["2", "OCR extracts the raw text (wiring in Step 2)"],
-    ["3", "Parser matches drink names to a local catalog"],
-    ["4", "AI generates tasting notes for unrecognized drinks"],
-    ["5", "Bottle names are resolved from the menu text"],
-  ];
-  return (
-    <div className="h-full flex flex-col overflow-y-auto no-scrollbar">
-      <header className="px-6 pt-6 pb-4 flex-shrink-0">
-        <p className="text-[10px] uppercase tracking-widest text-slate-500">About</p>
-        <h2
-          className="mt-2 text-3xl text-white leading-tight tracking-tight"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Spirit Note
-        </h2>
-        <p className="mt-3 text-sm text-slate-400 leading-7">
-          Scan any bar or cocktail menu and get a plain-language tasting guide — no bar expertise required.
-        </p>
-      </header>
-      <div className="px-5 pb-8 space-y-3">
-        {steps.map(([n, label]) => (
-          <div
-            key={n}
-            className="flex items-start gap-4 px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07]"
-          >
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[rgba(247,178,103,0.15)] text-[var(--app-accent)] text-xs flex items-center justify-center font-medium">
-              {n}
-            </span>
-            <p className="text-sm text-slate-300 leading-6">{label}</p>
-          </div>
-        ))}
-        <div className="px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07]">
-          <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-2">Build status</p>
-          {[
-            ["Scaffold + UI shell", "✓ Done"],
-            ["Local cocktail parser", "✓ Done"],
-            ["OCR wiring", "Step 2"],
-            ["AI tasting notes", "Step 3"],
-            ["Review screen", "Step 5"],
-            ["Vercel deploy", "Step 7"],
-          ].map(([k, v]) => (
-            <div key={k} className="flex items-center justify-between py-1.5 border-b border-white/[0.05] last:border-0">
-              <span className="text-xs text-slate-400">{k}</span>
-              <span className={`text-xs ${v.startsWith("✓") ? "text-[var(--app-mint)]" : "text-slate-500"}`}>{v}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -734,8 +676,6 @@ export default function Home() {
       <div className="flex-1 overflow-hidden relative">
         {activeTab === "history" ? (
           <HistoryScreen />
-        ) : activeTab === "about" ? (
-          <AboutScreen />
         ) : screen === "results" && analysis ? (
           <ResultsScreen
             analysis={analysis}
