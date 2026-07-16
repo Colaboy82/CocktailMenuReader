@@ -493,7 +493,7 @@ function BottomNav({
 
 // ─── History screen placeholder ───────────────────────────────────────────────
 
-function HistoryScreen() {
+function HistoryScreen({ onSelect }: { onSelect: (scan: MenuAnalysis) => void }) {
   // Step 6c — Load and display saved results from localStorage
   const history = loadHistory();
 
@@ -531,9 +531,10 @@ function HistoryScreen() {
           const dateStr = daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : `${daysAgo} days ago`;
 
           return (
-            <div
+            <button
               key={scan.savedAt}
-              className="px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07]"
+              onClick={() => onSelect(scan)}
+              className="w-full text-left px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07] active:scale-[0.98] transition-transform"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -543,8 +544,9 @@ function HistoryScreen() {
                     {scan.summary}
                   </p>
                 </div>
+                <span className="text-slate-500 text-xs mt-1">›</span>
               </div>
-            </div>
+            </button>
           );
         })}
         <button
@@ -705,6 +707,12 @@ export default function Home() {
     if (tab === "scan") setScreen("scan");
   }
 
+  function handleHistorySelect(scan: MenuAnalysis) {
+    setAnalysis(scan);
+    setScreen("results");
+    setActiveTab("scan");
+  }
+
   const now = new Date();
   const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
@@ -732,7 +740,7 @@ export default function Home() {
       {/* Main content area */}
       <div className="flex-1 overflow-hidden relative">
         {activeTab === "history" ? (
-          <HistoryScreen />
+          <HistoryScreen onSelect={handleHistorySelect} />
         ) : activeTab === "catalog" ? (
           <CatalogScreen />
         ) : screen === "results" && analysis ? (
