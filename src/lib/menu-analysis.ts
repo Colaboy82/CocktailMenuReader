@@ -319,11 +319,17 @@ export function analyzeMenuText(text: string): MenuAnalysis {
   const isPriceLine = (l: string) => /^\$?\d+(\.\d{1,2})?(\s*[\/|]\s*\$?\d+(\.\d{1,2})?)*$/.test(l);
 
   // Skip lines that look like section headers:
-  // all-caps short words (e.g. "COCKTAILS", "SPIRITS & WINE"), or common menu header words
+  // all-caps short words (e.g. "COCKTAILS", "LIGHT & PLAYFUL"), or common menu header words,
+  // or short title-case phrases with no commas (e.g. "Light & Playful", "Dark and Stirred")
   const isSectionHeader = (l: string) => {
-    if (l.length > 40) return false; // headers are short
-    if (/^[A-Z\s&\/\-–—]+$/.test(l) && l.split(/\s+/).length <= 5) return true; // ALL CAPS
-    if (/^(cocktails?|spirits?|wines?|beers?|mocktails?|appetizers?|starters?|mains?|desserts?|menu|drinks?|specials?|classics?|signatures?|non.alcoholic|low.abv|seasonal|featured)$/i.test(l.trim())) return true;
+    if (l.length > 50) return false; // headers are short
+    // All-caps (allows spaces, &, /, -, –, —, digits)
+    if (/^[A-Z0-9\s&\/\-–—]+$/.test(l) && l.split(/\s+/).length <= 6) return true;
+    // Title-case short phrase with no commas and no colon (e.g. "Light & Playful", "Small Bites")
+    if (!l.includes(",") && !l.includes(":") && l.split(/\s+/).length <= 5 &&
+        /^[A-Z][a-z]+(\s+(&|and|or|the|\+)\s+[A-Z][a-z]+)*$/.test(l)) return true;
+    // Common menu section keyword (case-insensitive, whole line)
+    if (/^(cocktails?|spirits?|wines?|beers?|mocktails?|appetizers?|starters?|mains?|desserts?|menu|drinks?|specials?|classics?|signatures?|non.alcoholic|low.abv|seasonal|featured|light|playful|dark|stirred|refreshing|boozy|tropical|sours?|highballs?|digestifs?|aperitifs?)$/i.test(l.trim())) return true;
     return false;
   };
 
