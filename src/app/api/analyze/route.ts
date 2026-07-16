@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";           // AI SDK core: sends a prompt, returns text
-import { google } from "@ai-sdk/google";     // Gemini provider: reads GOOGLE_GENERATIVE_AI_API_KEY
+import { groq } from "@ai-sdk/groq";        // Groq provider: reads GROQ_API_KEY
 import { analyzeMenuText } from "@/lib/menu-analysis"; // our local parser from Step 1
 import { generateObject } from "ai";  // structured output: validates response against a Zod schema
 import { z } from "zod";              // schema definition and validation library
@@ -33,10 +33,10 @@ export async function POST(req: NextRequest) {
 
     if (file && file.size > 0) {
       // Guard: if the developer forgot to add the key to .env.local,
-      // return a readable 503 "Service Unavailable" instead of a cryptic 401 from Google.
-      if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      // return a readable 503 "Service Unavailable" instead of a cryptic 401 from Groq.
+      if (!process.env.GROQ_API_KEY) {
         return NextResponse.json(
-          { error: "Add GOOGLE_GENERATIVE_AI_API_KEY to .env.local." },
+          { error: "Add GROQ_API_KEY to .env.local." },
           { status: 503 },
         );
       }
@@ -52,9 +52,9 @@ export async function POST(req: NextRequest) {
       // The destructured `{ text: extracted }` renames `text` to `extracted` to avoid
       // shadowing the outer `text` variable from formData above.
       const { text: extracted } = await generateText({
-        // `google("gemini-2.0-flash")` creates a model handle.
-        // The provider reads GOOGLE_GENERATIVE_AI_API_KEY from process.env automatically.
-        model: google("gemini-2.0-flash"),
+        // `groq("mixtral-8x7b-32768")` uses Groq's fast inference.
+        // The provider reads GROQ_API_KEY from process.env automatically.
+        model: groq("mixtral-8x7b-32768"),
         messages: [
           {
             role: "user",
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 
     if (unknownDrinks.length > 0) {
     const { object } = await generateObject({
-        model: google("gemini-2.0-flash"),
+        model: groq("mixtral-8x7b-32768"),
 
         // The schema is the contract between us and the model.
         // `generateObject` validates the response against this shape.
