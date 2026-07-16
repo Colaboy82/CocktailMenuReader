@@ -741,7 +741,6 @@ export default function Home() {
         ref={fileInputRef}
         type="file"
         accept="image/*,application/pdf"
-        capture="environment"
         onChange={handleFileChange}
         className="sr-only"
         aria-hidden="true"
