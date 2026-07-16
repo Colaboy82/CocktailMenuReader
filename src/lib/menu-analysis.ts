@@ -218,6 +218,8 @@ const flavorGroups: FlavorGroup[] = [
   },
 ];
 
+export { cocktailProfiles };
+
 // ─── Sample data ──────────────────────────────────────────────────────────────
 
 export const sampleMenuText = [

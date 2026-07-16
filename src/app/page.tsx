@@ -5,13 +5,14 @@ import { MenuAnalysis, type MenuItemAnalysis } from "@/lib/types";
 import {
   analyzeMenuText,
   sampleMenuText,
+  cocktailProfiles,
 } from "@/lib/menu-analysis";
 import { saveResult, loadHistory, clearHistory } from "@/lib/history";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Screen = "scan" | "results";
-type Tab = "scan" | "history";
+type Tab = "scan" | "history" | "catalog";
 
 // ─── SVG icons (no extra deps) ────────────────────────────────────────────────
 
@@ -461,6 +462,7 @@ function BottomNav({
   const tabs: Array<{ id: Tab; label: string; icon: ReactNode }> = [
     { id: "scan", label: "Scan", icon: <IcScan /> },
     { id: "history", label: "History", icon: <IcHistory /> },
+    { id: "catalog", label: "Catalog", icon: <IcText /> },
   ];
 
   return (
@@ -551,6 +553,64 @@ function HistoryScreen() {
         >
           Clear history
         </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Catalog screen ──────────────────────────────────────────────────────────
+
+function CatalogScreen() {
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  return (
+    <div className="h-full flex flex-col overflow-y-auto no-scrollbar">
+      <header className="px-6 pt-6 pb-4 flex-shrink-0">
+        <p className="text-[10px] uppercase tracking-widest text-slate-500">Library</p>
+        <h2
+          className="mt-2 text-3xl text-white leading-tight tracking-tight"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Known drinks
+        </h2>
+        <p className="mt-3 text-sm text-slate-400 leading-7">
+          {cocktailProfiles.length} drinks matched locally — no AI needed.
+        </p>
+      </header>
+      <div className="px-5 pb-8 space-y-2">
+        {cocktailProfiles.map((drink) => {
+          const isOpen = expanded === drink.name;
+          return (
+            <button
+              key={drink.name}
+              onClick={() => setExpanded(isOpen ? null : drink.name)}
+              className="w-full text-left px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07] active:scale-[0.98] transition-all"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white">{drink.name}</p>
+                  <p className="text-xs text-[var(--app-accent)] mt-0.5">{drink.style}</p>
+                </div>
+                <span className="text-slate-500 text-xs">{isOpen ? "▲" : "▼"}</span>
+              </div>
+              {isOpen && (
+                <div className="mt-3 space-y-2 text-left">
+                  <p className="text-xs text-slate-300 leading-5">{drink.taste}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {drink.similarDrinks.map((s) => (
+                      <span
+                        key={s}
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--app-mint)]/10 text-[var(--app-mint)] border border-[var(--app-mint)]/20"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -673,6 +733,8 @@ export default function Home() {
       <div className="flex-1 overflow-hidden relative">
         {activeTab === "history" ? (
           <HistoryScreen />
+        ) : activeTab === "catalog" ? (
+          <CatalogScreen />
         ) : screen === "results" && analysis ? (
           <ResultsScreen
             analysis={analysis}
