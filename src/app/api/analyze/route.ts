@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       // shadowing the outer `text` variable from formData above.
       const { text: extracted } = await generateText({
         // Gemini handles both images and PDFs natively via FilePart.
-        model: google("gemini-2.0-flash"),
+        model: google("gemini-2.5-flash"),
         messages: [
           {
             role: "user",
