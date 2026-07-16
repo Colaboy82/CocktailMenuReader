@@ -132,10 +132,17 @@ export async function POST(req: NextRequest) {
     // what the model actually read before the user confirms the analysis.
     return NextResponse.json({ ...analysis, rawOcrText });
   } catch (err) {
-    // Log the full error server-side for debugging in Vercel function logs.
-    // Never send a raw stack trace to the browser — that exposes internal details.
     console.error("[/api/analyze]", err);
     const message = err instanceof Error ? err.message : "Unexpected error";
+
+    // Detect quota exhaustion and return a user-friendly message.
+    if (message.includes("429") || message.includes("quota") || message.includes("Too Many Requests")) {
+      return NextResponse.json(
+        { error: "OCR limit reached for today. Paste the menu text manually instead — tap the 'Paste text' option on the scan screen." },
+        { status: 429 },
+      );
+    }
+
     return NextResponse.json({ error: `Analysis failed: ${message}` }, { status: 500 });
   }
 }
