@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
               { type: "file" as const, data: bytes, mediaType: mime },
               {
                 type: "text" as const,
-                text: "Extract only the cocktail and drink names with their ingredients from this menu. Preserve line breaks. Ignore prices, dollar amounts, and section headers (e.g. 'Light & Playful', 'Classics', 'Signatures').",
+                text: "Extract cocktails from this menu. For each drink, output exactly one line in this format: DRINK NAME: ingredient1, ingredient2, ingredient3. The drink name is the title (bold or larger text). Ingredients follow below it. Ignore prices, dollar amounts, and section headers like 'Light & Playful' or 'Classics'. Never output ingredients as separate lines — always combine drink name and ingredients on a single line separated by a colon.",
               },
             ],
           },

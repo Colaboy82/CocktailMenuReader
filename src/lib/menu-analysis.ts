@@ -246,7 +246,10 @@ function findProfile(line: string): CocktailProfile | undefined {
 }
 
 function extractName(line: string): string {
-  for (const sep of [" | ", " — ", " - ", " : ", ":"]) {
+  // Colon format from OCR prompt: "DRINK NAME: ingredient1, ingredient2"
+  const colon = line.indexOf(":");
+  if (colon > 0 && colon <= 50) return line.slice(0, colon).trim();
+  for (const sep of [" | ", " — ", " - "]) {
     if (line.includes(sep)) return line.split(sep)[0].trim();
   }
   const comma = line.indexOf(",");
