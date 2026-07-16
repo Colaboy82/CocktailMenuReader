@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateText } from "ai";           // AI SDK core: sends a prompt, returns text
-import { google } from "@ai-sdk/google";     // Gemini provider: OCR (handles images + PDFs)
-import { groq } from "@ai-sdk/groq";        // Groq provider: AI enrichment (free, text-only)
-import { analyzeMenuText } from "@/lib/menu-analysis"; // our local parser from Step 1
-import { generateObject } from "ai";  // structured output: validates response against a Zod schema
-import { z } from "zod";              // schema definition and validation library
+import { generateText, generateObject } from "ai";
+import { google } from "@ai-sdk/google";     // Gemini: OCR + AI enrichment
+import { analyzeMenuText } from "@/lib/menu-analysis";
+import { z } from "zod";
 import { MenuAnalysis } from "@/lib/types";
 
 // Vercel serverless functions default to a 10-second timeout.
@@ -96,31 +94,31 @@ export async function POST(req: NextRequest) {
 
     if (unknownDrinks.length > 0) {
     const { object } = await generateObject({
-        // Groq handles text-only enrichment — free tier, no file inputs needed.
-        model: groq("openai/gpt-oss-120b"),
-
-        // The schema is the contract between us and the model.
-        // `generateObject` validates the response against this shape.
-        // If the model returns a wrong type or missing field, the SDK retries up to 3 times.
+        model: google("gemini-2.5-flash"),
         schema: z.object({
         drinks: z.array(z.object({
             name: z.string(),
-            taste: z.string(),                    // two-sentence tasting note
-            similarDrinks: z.array(z.string()).max(2),   // two similar drinks
+            taste: z.string(),         // 2-3 sentence conversational tasting note
+            style: z.string(),         // spirit base + strength e.g. "Rye whiskey · medium-strong"
+            similarDrinks: z.array(z.string()).max(3),
         })),
         }),
+        prompt: `You are an expert sommelier, bartender, and spirits specialist.
 
-        prompt: `For each cocktail, write a two-sentence tasting note and suggest two similar drinks.
+For each cocktail listed below, provide:
+1. A clear taste profile in plain English (2-3 sentences, no jargon) — be conversational and approachable, as if explaining to someone who doesn't know cocktails
+2. A short style label that includes the spirit base and strength estimate (e.g. "Gin-based · light & refreshing", "Rye whiskey · spirit-forward, medium-strong")
+3. 2-3 similar drinks the guest might already know
 
-    Cocktails:
-    ${unknownDrinks.map((d) => d.name).join(", ")}`,
+Cocktails to describe:
+${unknownDrinks.map((d) => d.name).join("\n")}`,
     });
 
-    // Merge AI-generated notes back into the analysis items.
     for (const aiDrink of object.drinks) {
         const match = analysis.items.find((item) => item.name === aiDrink.name);
         if (match) {
         match.taste = aiDrink.taste;
+        match.style = aiDrink.style;
         match.similarDrinks = aiDrink.similarDrinks;
         }
     }
