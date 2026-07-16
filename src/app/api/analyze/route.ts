@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";           // AI SDK core: sends a prompt, returns text
-import { groq } from "@ai-sdk/groq";        // Groq provider: reads GROQ_API_KEY
+import { google } from "@ai-sdk/google";     // Gemini provider: OCR (handles images + PDFs)
+import { groq } from "@ai-sdk/groq";        // Groq provider: AI enrichment (free, text-only)
 import { analyzeMenuText } from "@/lib/menu-analysis"; // our local parser from Step 1
 import { generateObject } from "ai";  // structured output: validates response against a Zod schema
 import { z } from "zod";              // schema definition and validation library
@@ -32,11 +33,10 @@ export async function POST(req: NextRequest) {
     let rawOcrText = text?.trim() ?? "";
 
     if (file && file.size > 0) {
-      // Guard: if the developer forgot to add the key to .env.local,
-      // return a readable 503 "Service Unavailable" instead of a cryptic 401 from Groq.
-      if (!process.env.GROQ_API_KEY) {
+      // Guard: Gemini is used for OCR only.
+      if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
         return NextResponse.json(
-          { error: "Add GROQ_API_KEY to .env.local." },
+          { error: "Add GOOGLE_GENERATIVE_AI_API_KEY to .env.local." },
           { status: 503 },
         );
       }
@@ -52,9 +52,8 @@ export async function POST(req: NextRequest) {
       // The destructured `{ text: extracted }` renames `text` to `extracted` to avoid
       // shadowing the outer `text` variable from formData above.
       const { text: extracted } = await generateText({
-        // `groq("openai/gpt-oss-120b")` uses Groq's fast inference.
-        // The provider reads GROQ_API_KEY from process.env automatically.
-        model: groq("openai/gpt-oss-120b"),
+        // Gemini handles both images and PDFs natively via FilePart.
+        model: google("gemini-2.0-flash"),
         messages: [
           {
             role: "user",
@@ -97,6 +96,7 @@ export async function POST(req: NextRequest) {
 
     if (unknownDrinks.length > 0) {
     const { object } = await generateObject({
+        // Groq handles text-only enrichment — free tier, no file inputs needed.
         model: groq("openai/gpt-oss-120b"),
 
         // The schema is the contract between us and the model.
