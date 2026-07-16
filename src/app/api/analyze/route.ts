@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
               { type: "file" as const, data: bytes, mediaType: mime },
               {
                 type: "text" as const,
-                text: "Extract menu text. Preserve line breaks. Ignore prices and dollar amounts.",
+                text: "Extract only the cocktail and drink names with their ingredients from this menu. Preserve line breaks. Ignore prices, dollar amounts, and section headers (e.g. 'Light & Playful', 'Classics', 'Signatures').",
               },
             ],
           },
