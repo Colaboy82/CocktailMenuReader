@@ -353,9 +353,6 @@ function ScanScreen({
             Spirit Note
           </span>
         </div>
-        <span className="text-[10px] px-2.5 py-1 rounded-full border border-[rgba(247,178,103,0.3)] bg-[rgba(247,178,103,0.1)] text-[var(--app-accent)] uppercase tracking-widest">
-          Beta
-        </span>
       </header>
 
       <div className="flex-1 flex flex-col overflow-hidden">
