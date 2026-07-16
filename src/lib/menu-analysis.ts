@@ -315,11 +315,25 @@ export function analyzeMenuText(text: string): MenuAnalysis {
     .map((l) => l.trim())
     .filter(Boolean);
 
-  const candidates = lines.filter(
+  // Skip lines that are just prices (e.g. "$14", "18.00", "14 / 18")
+  const isPriceLine = (l: string) => /^\$?\d+(\.\d{1,2})?(\s*[\/|]\s*\$?\d+(\.\d{1,2})?)*$/.test(l);
+
+  // Skip lines that look like section headers:
+  // all-caps short words (e.g. "COCKTAILS", "SPIRITS & WINE"), or common menu header words
+  const isSectionHeader = (l: string) => {
+    if (l.length > 40) return false; // headers are short
+    if (/^[A-Z\s&\/\-–—]+$/.test(l) && l.split(/\s+/).length <= 5) return true; // ALL CAPS
+    if (/^(cocktails?|spirits?|wines?|beers?|mocktails?|appetizers?|starters?|mains?|desserts?|menu|drinks?|specials?|classics?|signatures?|non.alcoholic|low.abv|seasonal|featured)$/i.test(l.trim())) return true;
+    return false;
+  };
+
+  const filteredLines = lines.filter((l) => !isPriceLine(l) && !isSectionHeader(l));
+
+  const candidates = filteredLines.filter(
     (l) => findProfile(l) || /[|—:-]/.test(l) || l.split(/\s+/).length <= 9,
   );
 
-  const items = (candidates.length > 0 ? candidates : lines)
+  const items = (candidates.length > 0 ? candidates : filteredLines)
     .slice(0, 8)
     .map(parseLine);
 
