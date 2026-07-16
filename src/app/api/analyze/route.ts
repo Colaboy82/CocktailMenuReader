@@ -52,9 +52,9 @@ export async function POST(req: NextRequest) {
       // The destructured `{ text: extracted }` renames `text` to `extracted` to avoid
       // shadowing the outer `text` variable from formData above.
       const { text: extracted } = await generateText({
-        // `google("gemini-1.5-flash")` creates a model handle.
+        // `google("gemini-1.5-flash-latest")` creates a model handle.
         // The provider reads GOOGLE_GENERATIVE_AI_API_KEY from process.env automatically.
-        model: google("gemini-1.5-flash"),
+        model: google("gemini-1.5-flash-latest"),
         messages: [
           {
             role: "user",
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
 
     if (unknownDrinks.length > 0) {
     const { object } = await generateObject({
-        model: google("gemini-1.5-flash"),
+        model: google("gemini-1.5-flash-latest"),
 
         // The schema is the contract between us and the model.
         // `generateObject` validates the response against this shape.
