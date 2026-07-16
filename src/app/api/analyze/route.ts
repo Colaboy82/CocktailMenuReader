@@ -67,9 +67,7 @@ export async function POST(req: NextRequest) {
               { type: "file" as const, data: bytes, mediaType: mime },
               {
                 type: "text" as const,
-                // Keep the prompt minimal. The model’s only job here is text extraction.
-                // A short, direct prompt uses fewer tokens and avoids unwanted commentary.
-                text: "Extract all text from this cocktail menu. Raw text only, preserve line breaks, no commentary.",
+                text: "Extract menu text. Preserve line breaks.",
               },
             ],
           },
@@ -93,10 +91,9 @@ export async function POST(req: NextRequest) {
     // client-side stub from Step 1 — it works identically on the server.
     const analysis = analyzeMenuText(rawOcrText);
 
-    // Only enrich drinks the catalog didn't recognize confidently.
-    // confidence < 0.9 means the parser fell back to keyword matching, so the
-    // tasting note is generic and worth replacing with a real AI-generated one.
-    const unknownDrinks = analysis.items.filter((item) => item.confidence < 0.9);
+    // Only enrich drinks with low confidence (< 0.7).
+    // This reduces API calls significantly while maintaining quality for known drinks.
+    const unknownDrinks = analysis.items.filter((item) => item.confidence < 0.7);
 
     if (unknownDrinks.length > 0) {
     const { object } = await generateObject({
@@ -107,35 +104,24 @@ export async function POST(req: NextRequest) {
         // If the model returns a wrong type or missing field, the SDK retries up to 3 times.
         schema: z.object({
         drinks: z.array(z.object({
-            // The name must match what we sent in the prompt exactly —
-            // we use it as a lookup key to merge the AI note back into the analysis.
             name: z.string(),
             taste: z.string(),                    // two-sentence tasting note
-            style: z.string(),                    // short label e.g. "tropical sour"
-            similarDrinks: z.array(z.string()),   // exactly three similar drinks
+            similarDrinks: z.array(z.string()).max(2),   // two similar drinks
         })),
         }),
 
-        prompt: `You are a professional bartender and cocktail educator.
-    For each of the following cocktails, write:
-    - A two-sentence tasting note describing how the drink should taste.
-    - One style label (e.g. "tropical sour", "stirred spirit-forward").
-    - Three similar drinks the guest might enjoy.
+        prompt: `For each cocktail, write a two-sentence tasting note and suggest two similar drinks.
 
-    Cocktails to describe:
-    ${unknownDrinks.map((d) => `- ${d.name}: ${d.style}`).join("\n")}`,
+    Cocktails:
+    ${unknownDrinks.map((d) => d.name).join(", ")}`,
     });
 
     // Merge AI-generated notes back into the analysis items.
-    // We match by name so the same object reference gets updated in place.
     for (const aiDrink of object.drinks) {
         const match = analysis.items.find((item) => item.name === aiDrink.name);
         if (match) {
         match.taste = aiDrink.taste;
-        match.style = aiDrink.style;
         match.similarDrinks = aiDrink.similarDrinks;
-        // Do NOT update match.bottles — grounding rule:
-        // bottle data comes from text extraction only, never from model generation.
         }
     }
     }
