@@ -52,9 +52,9 @@ export async function POST(req: NextRequest) {
       // The destructured `{ text: extracted }` renames `text` to `extracted` to avoid
       // shadowing the outer `text` variable from formData above.
       const { text: extracted } = await generateText({
-        // `groq("mixtral-8x7b-32768")` uses Groq's fast inference.
+        // `groq("openai/gpt-oss-120b")` uses Groq's fast inference.
         // The provider reads GROQ_API_KEY from process.env automatically.
-        model: groq("mixtral-8x7b-32768"),
+        model: groq("openai/gpt-oss-120b"),
         messages: [
           {
             role: "user",
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 
     if (unknownDrinks.length > 0) {
     const { object } = await generateObject({
-        model: groq("mixtral-8x7b-32768"),
+        model: groq("openai/gpt-oss-120b"),
 
         // The schema is the contract between us and the model.
         // `generateObject` validates the response against this shape.
