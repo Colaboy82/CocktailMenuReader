@@ -167,6 +167,26 @@ function DrinkSheet({
             </div>
           </div>
 
+          {/* Strength */}
+          {drink.strength && (
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-3">
+                Strength
+              </p>
+              <div
+                className={`px-4 py-3 rounded-2xl border ${
+                  drink.strength === "light"
+                    ? "bg-[rgba(125,211,199,0.08)] border-[rgba(125,211,199,0.25)] text-[var(--app-mint)]"
+                    : drink.strength === "strong"
+                      ? "bg-[rgba(255,99,71,0.08)] border-[rgba(255,99,71,0.25)] text-[#ff6347]"
+                      : "bg-[rgba(247,178,103,0.08)] border-[rgba(247,178,103,0.25)] text-[var(--app-accent)]"
+                }`}
+              >
+                <p className="text-sm capitalize font-medium">{drink.strength}</p>
+              </div>
+            </div>
+          )}
+
           {/* Similar drinks */}
           <div>
             <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-3">
@@ -221,6 +241,13 @@ function DrinkCard({
   const pct = Math.round(drink.confidence * 100);
   const highConfidence = pct >= 90;
 
+  const strengthColor =
+    drink.strength === "light"
+      ? "bg-[rgba(125,211,199,0.12)] text-[var(--app-mint)]"
+      : drink.strength === "strong"
+        ? "bg-[rgba(255,99,71,0.12)] text-[#ff6347]"
+        : "bg-[rgba(247,178,103,0.12)] text-[var(--app-accent)]";
+
   return (
     <button
       onClick={() => onTap(drink)}
@@ -254,18 +281,21 @@ function DrinkCard({
       <p className="mt-2.5 text-sm leading-6 text-slate-300 line-clamp-2">
         {drink.taste}
       </p>
-      {drink.similarDrinks.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {drink.similarDrinks.slice(0, 2).map((d: string) => (
-            <span
-              key={d}
-              className="text-[10px] px-2.5 py-1 rounded-full bg-black/25 border border-white/[0.07] text-slate-400"
-            >
-              {d}
-            </span>
-          ))}
-        </div>
-      )}
+      <div className="mt-3 flex flex-wrap gap-1.5 items-center">
+        {drink.similarDrinks.slice(0, 2).map((d: string) => (
+          <span
+            key={d}
+            className="text-[10px] px-2.5 py-1 rounded-full bg-black/25 border border-white/[0.07] text-slate-400"
+          >
+            {d}
+          </span>
+        ))}
+        {drink.strength && (
+          <span className={`text-[10px] px-2.5 py-1 rounded-full border border-white/[0.07] ${strengthColor}`}>
+            {drink.strength}
+          </span>
+        )}
+      </div>
     </button>
   );
 }
