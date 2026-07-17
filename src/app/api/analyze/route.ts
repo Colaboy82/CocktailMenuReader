@@ -107,15 +107,15 @@ export async function POST(req: NextRequest) {
         prompt: `You are an expert sommelier, bartender, and spirits specialist.
 
 For each cocktail listed below, provide:
-1. A taste profile with TWO parts:
-   a. Specific flavor notes with intensity scale (1=subtle, 2=moderate, 3=strong). Format: "Citrus (2), Tropical (3), Herbal (1)"
-   b. A clear description in plain English (2-3 sentences, no jargon) — be conversational and approachable, as if explaining to someone who doesn't know cocktails
-   Combine these into one taste field: "Flavor Notes: [list]. [Description sentences]"
-2. A short style label that includes the spirit base and strength estimate (e.g. "Gin-based · light & refreshing", "Rye whiskey · spirit-forward, medium-strong")
-3. Strength level: one of "light", "medium", or "strong" based on alcohol content and intensity
-4. 2-3 similar drinks the guest might already know
+1. A taste profile that includes:
+   - Specific flavor notes with intensity scale (1=subtle, 2=moderate, 3=strong). Format: "Citrus (2), Tropical (3), Herbal (1)"
+   - A conversational 2-3 sentence description in plain English (no jargon), as if explaining to someone new to cocktails. Be natural and vary your descriptions — don't use the same phrasing for each drink.
+   - Combine these: "Flavor Notes: [list]. [Your description]"
+2. A short style label with spirit base and strength estimate (e.g. "Gin-based · light & refreshing")
+3. Strength: "light", "medium", or "strong"
+4. 2-3 similar drinks to recommend
 
-Cocktails to describe:
+Cocktails:
 ${unknownDrinks.map((d) => d.name).join("\n")}`,
     });
 
