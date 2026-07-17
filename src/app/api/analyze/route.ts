@@ -107,7 +107,10 @@ export async function POST(req: NextRequest) {
         prompt: `You are an expert sommelier, bartender, and spirits specialist.
 
 For each cocktail listed below, provide:
-1. A clear taste profile in plain English (2-3 sentences, no jargon) — be conversational and approachable, as if explaining to someone who doesn't know cocktails
+1. A taste profile with TWO parts:
+   a. Specific flavor notes with intensity scale (1=subtle, 2=moderate, 3=strong). Format: "Citrus (2), Tropical (3), Herbal (1)"
+   b. A clear description in plain English (2-3 sentences, no jargon) — be conversational and approachable, as if explaining to someone who doesn't know cocktails
+   Combine these into one taste field: "Flavor Notes: [list]. [Description sentences]"
 2. A short style label that includes the spirit base and strength estimate (e.g. "Gin-based · light & refreshing", "Rye whiskey · spirit-forward, medium-strong")
 3. Strength level: one of "light", "medium", or "strong" based on alcohol content and intensity
 4. 2-3 similar drinks the guest might already know
