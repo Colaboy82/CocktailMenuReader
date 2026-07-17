@@ -335,10 +335,19 @@ function parseLine(line: string): MenuItemAnalysis {
   }
   const name = extractName(line);
   const { notes, similar } = flavorFallback(line);
+  const primaryNote = notes[0];
+  const otherNotes = notes.slice(1, 3).join(" and ");
+  const tasteTexts = [
+    `A ${primaryNote} cocktail with hints of ${otherNotes}. Perfect for those seeking balanced, approachable flavors.`,
+    `You'll discover ${notes.slice(0, 3).join(", ")} working together in this drink. A solid choice for a refreshing moment.`,
+    `This brings ${primaryNote} character enhanced by ${otherNotes}. An easy-drinking option that works well any time.`,
+    `Look for ${notes.slice(0, 2).join(" and ")} as the stars here. Smooth and enjoyable, with layered complexity.`,
+  ];
+  const tasteText = tasteTexts[Math.floor(Math.random() * tasteTexts.length)];
   return {
     name,
     style: notes.join(" / "),
-    taste: `Expect a ${notes.slice(0, 3).join(", ")} profile with a finish that reads as ${notes[0]}.`,
+    taste: tasteText,
     similarDrinks: similar.slice(0, 3),
     bottles: [],
     confidence: Math.min(0.86, 0.52 + notes.length * 0.07),
