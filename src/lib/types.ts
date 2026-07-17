@@ -12,6 +12,7 @@ export type MenuItemAnalysis = {
   bottles: string[];
   confidence: number;
   strength: string;          // "light", "medium", "strong"
+  barSignificance?: string;   // e.g. "House specialty", "Chef's creation", "Made fresh daily"
   aiGenerated: boolean;
 };
 

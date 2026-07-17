@@ -131,9 +131,16 @@ function DrinkSheet({
             >
               {drink.name}
             </h2>
-            <span className="inline-block mt-2 px-3 py-1 rounded-full text-[11px] uppercase tracking-widest border border-[rgba(247,178,103,0.25)] bg-[rgba(247,178,103,0.12)] text-[var(--app-accent)]">
-              {drink.style}
-            </span>
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <span className="inline-block px-3 py-1 rounded-full text-[11px] uppercase tracking-widest border border-[rgba(247,178,103,0.25)] bg-[rgba(247,178,103,0.12)] text-[var(--app-accent)]">
+                {drink.style}
+              </span>
+              {drink.barSignificance && (
+                <span className="inline-block px-3 py-1 rounded-full text-[11px] uppercase tracking-widest border border-[rgba(247,178,103,0.25)] bg-[rgba(247,178,103,0.12)] text-[var(--app-accent)]">
+                  ★ {drink.barSignificance}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Taste note */}
@@ -222,7 +229,14 @@ function DrinkCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <h3 className="text-base font-medium text-white truncate">{drink.name}</h3>
-          <p className="text-xs text-slate-500 mt-0.5">{drink.style}</p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <p className="text-xs text-slate-500">{drink.style}</p>
+            {drink.barSignificance && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(247,178,103,0.15)] text-[var(--app-accent)]">
+                ★ {drink.barSignificance}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0 pt-0.5">
           <span

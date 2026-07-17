@@ -101,10 +101,11 @@ export async function POST(req: NextRequest) {
             taste: z.string(),
             style: z.string(),
             strength: z.enum(["light", "medium", "strong"]),
+            barSignificance: z.string().optional(),
             similarDrinks: z.array(z.string()).max(3),
         })),
         }),
-        prompt: `You are an expert sommelier, bartender, and spirits specialist.
+        prompt: `You are an expert sommelier, bartender, and spirits specialist. You have access to the raw menu text.
 
 For each cocktail listed below, provide:
 1. A taste profile that includes:
@@ -113,9 +114,15 @@ For each cocktail listed below, provide:
    - Combine these: "Flavor Notes: [list]. [Your description]"
 2. A short style label with spirit base and strength estimate (e.g. "Gin-based · light & refreshing")
 3. Strength: "light", "medium", or "strong"
-4. 2-3 similar drinks to recommend
+4. Bar significance (if applicable): If the menu text suggests this is a house specialty, chef's creation, signature drink, made fresh in-house, or has special meaning to the bar, describe it in 1-2 short words/phrases. Examples: "House specialty", "Chef's creation", "Made daily", "Signature drink". Leave empty if not mentioned.
+5. 2-3 similar drinks to recommend
 
-Cocktails:
+Be conversational and approachable — explain tastes as if describing to someone who doesn't know cocktails.
+
+Menu text context:
+${rawOcrText}
+
+Cocktails to describe:
 ${unknownDrinks.map((d) => d.name).join("\n")}`,
     });
 
@@ -125,6 +132,9 @@ ${unknownDrinks.map((d) => d.name).join("\n")}`,
         match.taste = aiDrink.taste;
         match.style = aiDrink.style;
         match.strength = aiDrink.strength;
+        if (aiDrink.barSignificance) {
+            match.barSignificance = aiDrink.barSignificance;
+        }
         match.similarDrinks = aiDrink.similarDrinks;
         }
     }
