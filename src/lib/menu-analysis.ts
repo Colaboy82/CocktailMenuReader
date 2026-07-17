@@ -335,12 +335,10 @@ function parseLine(line: string): MenuItemAnalysis {
   }
   const name = extractName(line);
   const { notes, similar } = flavorFallback(line);
-  const primaryNote = notes[0];
-  const otherNotes = notes.length > 1 ? notes.slice(1).join(", ") : "nuanced undertones";
   return {
     name,
     style: notes.join(" / "),
-    taste: `This drink brings ${primaryNote} as its defining character, complemented by ${otherNotes}. A well-rounded option that's approachable and satisfying.`,
+    taste: notes.join(", "),
     similarDrinks: similar.slice(0, 3),
     bottles: [],
     confidence: Math.min(0.86, 0.52 + notes.length * 0.07),
