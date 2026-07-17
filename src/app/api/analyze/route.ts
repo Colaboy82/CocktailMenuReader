@@ -98,8 +98,9 @@ export async function POST(req: NextRequest) {
         schema: z.object({
         drinks: z.array(z.object({
             name: z.string(),
-            taste: z.string(),         // 2-3 sentence conversational tasting note
-            style: z.string(),         // spirit base + strength e.g. "Rye whiskey · medium-strong"
+            taste: z.string(),
+            style: z.string(),
+            strength: z.enum(["light", "medium", "strong"]),
             similarDrinks: z.array(z.string()).max(3),
         })),
         }),
@@ -108,7 +109,8 @@ export async function POST(req: NextRequest) {
 For each cocktail listed below, provide:
 1. A clear taste profile in plain English (2-3 sentences, no jargon) — be conversational and approachable, as if explaining to someone who doesn't know cocktails
 2. A short style label that includes the spirit base and strength estimate (e.g. "Gin-based · light & refreshing", "Rye whiskey · spirit-forward, medium-strong")
-3. 2-3 similar drinks the guest might already know
+3. Strength level: one of "light", "medium", or "strong" based on alcohol content and intensity
+4. 2-3 similar drinks the guest might already know
 
 Cocktails to describe:
 ${unknownDrinks.map((d) => d.name).join("\n")}`,
@@ -119,6 +121,7 @@ ${unknownDrinks.map((d) => d.name).join("\n")}`,
         if (match) {
         match.taste = aiDrink.taste;
         match.style = aiDrink.style;
+        match.strength = aiDrink.strength;
         match.similarDrinks = aiDrink.similarDrinks;
         }
     }

@@ -223,12 +223,34 @@ export { cocktailProfiles };
 // ─── Sample data ──────────────────────────────────────────────────────────────
 
 export const sampleMenuText = [
+  "Old Fashioned | bourbon, sugar, bitters, orange",
+  "Margarita | tequila, lime, triple sec, agave",
+  "Daiquiri | rum, lime, sugar",
+  "Negroni | gin, Campari, sweet vermouth",
+  "Mojito | rum, mint, lime, sugar, soda",
+  "Whiskey Sour | bourbon, lemon, sugar, egg white",
+  "Cosmopolitan | vodka, triple sec, cranberry, lime",
+  "Manhattan | rye whiskey, sweet vermouth, bitters",
+  "Martini | gin or vodka, dry vermouth",
+  "Tom Collins | gin, lemon, sugar, soda",
+  "Mai Tai | rum, lime, orgeat, orange liqueur",
+  "Bloody Mary | vodka, tomato juice, spices",
+  "Pina Colada | rum, coconut cream, pineapple juice",
+  "Caipirinha | cachaça, lime, sugar",
+  "Sazerac | rye whiskey or cognac, absinthe rinse, bitters",
+  "Gimlet | gin or vodka, lime juice, simple syrup",
+  "Sidecar | cognac, triple sec, lemon juice",
+  "Aperol Spritz | Aperol, prosecco, soda",
   "Mezcal Paloma | Del Maguey Vida mezcal, grapefruit, lime, agave, saline",
   "Paper Plane | bourbon, Aperol, Amaro Nonino, lemon",
   "French 75 | gin, lemon, sugar, Prosecco",
   "Oaxacan Old Fashioned | reposado tequila, mezcal, agave, Angostura bitters",
   "Negroni Sbagliato | Campari, sweet vermouth, Prosecco",
   "Old Cuban | aged rum, mint, lime, sparkling wine, Angostura bitters",
+  "Last Word | gin, green Chartreuse, maraschino liqueur, lime",
+  "Jungle Bird | dark rum, Campari, pineapple, lime, simple syrup",
+  "Penicillin | blended Scotch, honey-ginger syrup, lemon, peated Islay float",
+  "Espresso Martini | vodka, Kahlúa, espresso, simple syrup",
 ].join("\n");
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -276,6 +298,20 @@ function flavorFallback(line: string): { notes: string[]; similar: string[] } {
   };
 }
 
+function estimateStrength(line: string): string {
+  const l = lower(line);
+  // Strong: multiple spirits, high-proof bases, dark liqueurs
+  if (/whiskey|whisky|rye|bourbon|rum|tequila|mezcal|brandy|cognac|scotch|fernet|chartreuse|overproof|cask.proof|barrel/.test(l)) {
+    if (/(?:double|aged|barrel|reserve|cask|overproof|neat|stirred|up)/.test(l)) return "strong";
+  }
+  // Light: sparkling, low-abv, effervescent, citrus-focused
+  if (/prosecco|champagne|sparkling|soda|juice|mocktail|low.abv|aperol|vermouth|sherry/.test(l)) {
+    if (!/(whiskey|whisky|rum|vodka|tequila|mezcal|brandy)/.test(l)) return "light";
+  }
+  // Medium: balanced cocktails
+  return "medium";
+}
+
 function detectBottles(text: string): BottleMention[] {
   const l = lower(text);
   return bottleLibrary
@@ -293,6 +329,7 @@ function parseLine(line: string): MenuItemAnalysis {
       similarDrinks: profile.similarDrinks,
       bottles: profile.bottleHints.filter((h) => lower(line).includes(h)),
       confidence: 0.94,
+      strength: estimateStrength(line),
       aiGenerated: false,
     };
   }
@@ -305,6 +342,7 @@ function parseLine(line: string): MenuItemAnalysis {
     similarDrinks: similar.slice(0, 3),
     bottles: [],
     confidence: Math.min(0.86, 0.52 + notes.length * 0.07),
+    strength: estimateStrength(line),
     aiGenerated: false,
   };
 }

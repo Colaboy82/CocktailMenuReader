@@ -11,6 +11,7 @@ export type MenuItemAnalysis = {
   similarDrinks: string[];
   bottles: string[];
   confidence: number;
+  strength: string;          // "light", "medium", "strong"
   aiGenerated: boolean;
 };
 
