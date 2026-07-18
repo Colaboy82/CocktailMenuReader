@@ -595,7 +595,7 @@ function CatalogScreen() {
           Known drinks
         </h2>
         <p className="mt-3 text-sm text-slate-400 leading-7">
-          {cocktailProfiles.length} drinks matched locally — no AI needed.
+          {cocktailProfiles.length} drinks in the catalog.
         </p>
       </header>
       <div className="px-5 pb-8 space-y-2">
