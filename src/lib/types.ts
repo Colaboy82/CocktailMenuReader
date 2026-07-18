@@ -13,6 +13,7 @@ export type MenuItemAnalysis = {
   confidence: number;
   strength: string;          // "light", "medium", "strong"
   barSignificance?: string;   // e.g. "House specialty", "Chef's creation", "Made fresh daily"
+  rawLine?: string;           // original OCR line, used for AI enrichment context
   aiGenerated: boolean;
 };
 

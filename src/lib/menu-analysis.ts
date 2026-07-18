@@ -302,6 +302,7 @@ function parseLine(line: string): MenuItemAnalysis {
       bottles: profileBottles,
       confidence: 0.94,
       strength: estimateStrength(line),
+      rawLine: line,
       aiGenerated: false,
     };
   }
@@ -315,6 +316,7 @@ function parseLine(line: string): MenuItemAnalysis {
     bottles: [],
     confidence: Math.min(0.86, 0.52 + notes.length * 0.07),
     strength: estimateStrength(line),
+    rawLine: line,
     aiGenerated: false,
   };
 }

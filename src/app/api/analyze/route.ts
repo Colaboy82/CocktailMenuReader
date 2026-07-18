@@ -121,7 +121,7 @@ Menu text context:
 ${rawOcrText}
 
 Cocktails:
-${unknownDrinks.map((d) => d.name).join("\n")}`,
+${unknownDrinks.map((d) => `- ${d.name}${d.rawLine && d.rawLine !== d.name ? ` (menu description: "${d.rawLine}")` : ""}`).join("\n")}`,
     });
 
     for (const aiDrink of object.drinks) {
