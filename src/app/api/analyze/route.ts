@@ -88,9 +88,9 @@ export async function POST(req: NextRequest) {
     // client-side stub from Step 1 — it works identically on the server.
     const analysis = analyzeMenuText(rawOcrText);
 
-    // Only enrich drinks with low confidence (< 0.7).
-    // This reduces API calls significantly while maintaining quality for known drinks.
-    const unknownDrinks = analysis.items.filter((item) => item.confidence < 0.7);
+    // Enrich any drink that isn't a confirmed catalog match (confidence < 0.94).
+    // Fallback drinks can score up to 0.86, so the old < 0.7 threshold skipped them entirely.
+    const unknownDrinks = analysis.items.filter((item) => item.confidence < 0.94);
 
     if (unknownDrinks.length > 0) {
     const { object } = await generateObject({
