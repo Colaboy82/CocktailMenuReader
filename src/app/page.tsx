@@ -390,6 +390,8 @@ function DrinkSheet({
   const [rating, setRating] = useState(0);
   const [initialRating, setInitialRating] = useState(0);
   const [isSavingRating, setIsSavingRating] = useState(false);
+  const [ratingSaved, setRatingSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Load existing rating if user is signed in
   useEffect(() => {
@@ -413,6 +415,7 @@ function DrinkSheet({
 
   async function saveRating() {
     if (!user || rating === 0) return;
+    setSaveError(null);
     setIsSavingRating(true);
     try {
       const res = await fetch("/api/ratings", {
@@ -434,8 +437,13 @@ function DrinkSheet({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save rating");
       setInitialRating(rating);
+      setRatingSaved(true);
       onRatingSaved?.();
-      onClose();
+      // Auto close after 1.5 seconds
+      setTimeout(() => onClose(), 1500);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save rating";
+      setSaveError(message);
     } finally {
       setIsSavingRating(false);
     }
@@ -569,21 +577,42 @@ function DrinkSheet({
 
           {/* Save button (only if rating changed and user is logged in) */}
           {user && rating !== initialRating && rating > 0 && (
-            <div className="flex gap-2">
-              <button
-                onClick={() => setRating(initialRating)}
-                disabled={isSavingRating}
-                className="flex-1 px-4 py-2.5 rounded-2xl bg-white/[0.05] text-slate-300 text-sm font-medium hover:bg-white/[0.08] active:bg-white/[0.1] disabled:opacity-50 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveRating}
-                disabled={isSavingRating}
-                className="flex-1 px-4 py-2.5 rounded-2xl bg-[var(--app-accent)] text-black text-sm font-medium hover:opacity-90 active:opacity-80 disabled:opacity-50 transition"
-              >
-                {isSavingRating ? "Saving..." : "Save Rating"}
-              </button>
+            <div className="space-y-2">
+              {ratingSaved ? (
+                <button
+                  disabled
+                  className="w-full px-4 py-2.5 rounded-2xl bg-[var(--app-mint)] text-black text-sm font-medium"
+                >
+                  ✓ Saved
+                </button>
+              ) : (
+                <>
+                  {saveError && (
+                    <div className="px-3 py-2 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
+                      {saveError}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setRating(initialRating);
+                        setSaveError(null);
+                      }}
+                      disabled={isSavingRating}
+                      className="flex-1 px-4 py-2.5 rounded-2xl bg-white/[0.05] text-slate-300 text-sm font-medium hover:bg-white/[0.08] active:bg-white/[0.1] disabled:opacity-50 transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={saveRating}
+                      disabled={isSavingRating}
+                      className="flex-1 px-4 py-2.5 rounded-2xl bg-[var(--app-accent)] text-black text-sm font-medium hover:opacity-90 active:opacity-80 disabled:opacity-50 transition"
+                    >
+                      {isSavingRating ? "Saving..." : "Save Rating"}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
