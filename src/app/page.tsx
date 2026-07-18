@@ -343,6 +343,7 @@ function ProfileScreen({ user, onSignOut, onSignIn, refreshKey, onRatingSaved }:
           user={user}
           scanId={null}
           barName={selectedDrink.barName}
+          onRatingSaved={onRatingSaved}
         />
       )}
     </div>
@@ -357,12 +358,14 @@ function DrinkSheet({
   user,
   scanId,
   barName,
+  onRatingSaved,
 }: {
   drink: MenuItemAnalysis;
   onClose: () => void;
   user: User | null;
   scanId: string | null;
   barName?: string;
+  onRatingSaved?: () => void;
 }) {
   const [rating, setRating] = useState(0);
   const [initialRating, setInitialRating] = useState(0);
@@ -398,6 +401,7 @@ function DrinkSheet({
         body: JSON.stringify({ userId: user.id, cocktailName: drink.name, stars: rating, scanId }),
       });
       setInitialRating(rating);
+      onRatingSaved?.();
       onClose();
     } finally {
       setIsSavingRating(false);
