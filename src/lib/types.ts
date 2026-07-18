@@ -22,4 +22,5 @@ export type MenuAnalysis = {
   items: MenuItemAnalysis[];
   bottleMentions: BottleMention[];
   rawOcrText?: string;
+  id?: string;  // Supabase scan ID, if loaded from database
 };

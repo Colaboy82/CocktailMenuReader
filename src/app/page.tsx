@@ -395,11 +395,13 @@ function DrinkSheet({
     if (!user || rating === 0) return;
     setIsSavingRating(true);
     try {
-      await fetch("/api/ratings", {
+      const res = await fetch("/api/ratings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: user.id, cocktailName: drink.name, stars: rating, scanId }),
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save rating");
       setInitialRating(rating);
       onRatingSaved?.();
       onClose();
@@ -1146,9 +1148,11 @@ export default function Home() {
         body: JSON.stringify({ userId: user.id, scan: result, barName: defaultBarName }),
       });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save scan");
       if (data.id) setCurrentScanId(data.id);
-    } catch {
+    } catch (err) {
       // Fallback to localStorage if Supabase save fails
+      console.error("Supabase save failed:", err);
       saveResult(result);
     }
   }
@@ -1235,6 +1239,7 @@ export default function Home() {
 
   function handleHistorySelect(scan: MenuAnalysis) {
     setAnalysis(scan);
+    setCurrentScanId(scan.id ?? null);
     setScreen("results");
     setActiveTab("scan");
   }
