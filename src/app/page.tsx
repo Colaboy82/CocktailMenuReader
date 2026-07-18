@@ -365,6 +365,8 @@ function DrinkSheet({
   barName?: string;
 }) {
   const [rating, setRating] = useState(0);
+  const [initialRating, setInitialRating] = useState(0);
+  const [isSavingRating, setIsSavingRating] = useState(false);
 
   // Load existing rating if user is signed in
   useEffect(() => {
@@ -374,19 +376,32 @@ function DrinkSheet({
       .then(data => {
         if (Array.isArray(data)) {
           const existing = data.find((r: { cocktail_name: string }) => r.cocktail_name.toLowerCase() === drink.name.toLowerCase());
-          if (existing) setRating(existing.stars);
+          if (existing) {
+            setRating(existing.stars);
+            setInitialRating(existing.stars);
+          }
         }
       });
   }, [user, drink.name]);
 
-  async function handleRating(stars: number) {
+  function handleRating(stars: number) {
     setRating(stars);
-    if (!user) return;
-    await fetch("/api/ratings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: user.id, cocktailName: drink.name, stars, scanId }),
-    });
+  }
+
+  async function saveRating() {
+    if (!user || rating === 0) return;
+    setIsSavingRating(true);
+    try {
+      await fetch("/api/ratings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, cocktailName: drink.name, stars: rating, scanId }),
+      });
+      setInitialRating(rating);
+      onClose();
+    } finally {
+      setIsSavingRating(false);
+    }
   }
 
   const pct = Math.round(drink.confidence * 100);
@@ -514,6 +529,26 @@ function DrinkSheet({
               <p className="text-xs text-slate-500">Sign in to rate cocktails and build your flavor profile.</p>
             )}
           </div>
+
+          {/* Save button (only if rating changed and user is logged in) */}
+          {user && rating !== initialRating && rating > 0 && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setRating(initialRating)}
+                disabled={isSavingRating}
+                className="flex-1 px-4 py-2.5 rounded-2xl bg-white/[0.05] text-slate-300 text-sm font-medium hover:bg-white/[0.08] active:bg-white/[0.1] disabled:opacity-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveRating}
+                disabled={isSavingRating}
+                className="flex-1 px-4 py-2.5 rounded-2xl bg-[var(--app-accent)] text-black text-sm font-medium hover:opacity-90 active:opacity-80 disabled:opacity-50 transition"
+              >
+                {isSavingRating ? "Saving..." : "Save Rating"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -599,12 +634,14 @@ function ResultsScreen({
   onDrinkTap,
   scanId,
   user,
+  onSave,
 }: {
   analysis: MenuAnalysis;
   onBack: () => void;
   onDrinkTap: (d: MenuItemAnalysis) => void;
   scanId: string | null;
   user: User | null;
+  onSave: () => Promise<void>;
 }) {
   const [barName, setBarName] = useState(() => {
     // Initialize with default bar name (date-based)
@@ -613,7 +650,7 @@ function ResultsScreen({
     return (analysis as MenuAnalysis & { barName?: string }).barName ?? `${dateStr} menu`;
   });
   const [editingBar, setEditingBar] = useState(false);
-  const [barSaved, setBarSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   async function saveBarName() {
     if (!scanId || !barName.trim()) return;
@@ -623,7 +660,15 @@ function ResultsScreen({
       body: JSON.stringify({ scanId, barName: barName.trim() }),
     });
     setEditingBar(false);
-    setBarSaved(true);
+  }
+
+  async function handleSave() {
+    setIsSaving(true);
+    try {
+      await onSave();
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -672,6 +717,26 @@ function ResultsScreen({
               <span>{barName}</span>
             </button>
           )}
+        </div>
+      )}
+
+      {/* Save/Discard buttons */}
+      {user && (
+        <div className="px-5 pt-2 pb-2 flex-shrink-0 flex gap-2">
+          <button
+            onClick={() => onBack()}
+            disabled={isSaving}
+            className="flex-1 px-4 py-2.5 rounded-2xl bg-white/[0.05] text-slate-300 text-sm font-medium hover:bg-white/[0.08] active:bg-white/[0.1] disabled:opacity-50 transition"
+          >
+            Discard
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="flex-1 px-4 py-2.5 rounded-2xl bg-[var(--app-accent)] text-black text-sm font-medium hover:opacity-90 active:opacity-80 disabled:opacity-50 transition"
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </button>
         </div>
       )}
 
@@ -1094,7 +1159,6 @@ export default function Home() {
       const result = data as typeof data & { rawOcrText?: string };
       setAnalysis(result);
       setCurrentScanId(null);
-      await saveScanToAccount(result);
       setScreen("results");
       setActiveTab("scan");
     } catch (err) {
@@ -1219,6 +1283,10 @@ export default function Home() {
             onDrinkTap={setSelectedDrink}
             scanId={currentScanId}
             user={user}
+            onSave={async () => {
+              await saveScanToAccount(analysis);
+              setScreen("scan");
+            }}
           />
         ) : pageState === "reviewing" ? (
           /* ── Step 5b — Review screen ────────────────────────────── */
