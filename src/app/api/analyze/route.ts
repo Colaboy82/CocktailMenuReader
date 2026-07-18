@@ -104,23 +104,20 @@ export async function POST(req: NextRequest) {
             similarDrinks: z.array(z.string()).max(3),
         })),
         }),
-        prompt: `You are an expert sommelier and bartender.
+        prompt: `You are an expert sommelier and bartender helping someone unfamiliar with cocktails understand what they're ordering.
 
 For each cocktail listed below, provide:
-1. A taste field combining:
-   - Specific flavor notes with intensity (1=subtle, 2=moderate, 3=strong). Format: "Citrus (2), Tropical (3), Herbal (1)"
-   - Two concise sentences: the first describes the overall flavor character (e.g. "Its flavor is balanced and nuanced, combining the warmth of whiskey with the sweetness of sugar and aromatic bitters."), the second describes what you experience through the sip (e.g. "The first sip delivers bright citrus, followed by hints of caramel and vanilla, with a smooth bold finish.")
-   - Combined format: "Flavor Notes: [list]. [Two sentences]"
-2. A short style label with spirit base and strength (e.g. "Gin-based · light & refreshing")
-3. Strength: "light", "medium", or "strong"
-4. Bar significance (if the menu text suggests this is a house specialty, signature, or made in-house): 1-2 words/phrases. Leave empty if not mentioned.
-5. 2-3 similar drinks
+1. taste: Exactly 2 sentences in plain, conversational English. No jargon. The first sentence describes the overall flavor character (e.g. "Its flavor is balanced and smooth, blending the warmth of whiskey with a touch of sweetness and aromatic bitters."). The second describes what you taste through the sip (e.g. "You'll notice hints of caramel and vanilla up front, with a subtle spice and a clean, lingering finish."). Do NOT use comma-separated adjective lists like "bright, zesty, fresh" — write full sentences.
+2. style: A short label with spirit base and vibe (e.g. "Gin-based · light & refreshing")
+3. strength: "light", "medium", or "strong"
+4. barSignificance: If the menu text suggests this is a house specialty, signature, or made in-house, describe in 1-2 words. Leave empty otherwise.
+5. similarDrinks: 2-3 drinks they might already know
 
-Menu text context:
+Menu text:
 ${rawOcrText}
 
 Cocktails:
-${unknownDrinks.map((d) => `- ${d.name}${d.rawLine && d.rawLine !== d.name ? ` (menu description: "${d.rawLine}")` : ""}`).join("\n")}`,
+${unknownDrinks.map((d) => `- ${d.name}${d.rawLine && d.rawLine !== d.name ? ` (menu: "${d.rawLine}")` : ""}`).join("\n")}`,
     });
 
     for (const aiDrink of object.drinks) {

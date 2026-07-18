@@ -25,7 +25,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: ["paloma"],
     style: "Smoky citrus highball",
     taste:
-      "Flavor Notes: Smoky (3), Grapefruit (3), Lime (2), Saline (2). Its flavor is bold and vibrant, opening with earthy mezcal smoke and a burst of bright grapefruit. The finish is crisp and dry, with a subtle salt edge that keeps every sip refreshing.",
+      "Its flavor is bold and vibrant, opening with earthy mezcal smoke and a burst of bright grapefruit. The finish is crisp and dry, with a subtle salt edge that keeps every sip refreshing.",
     similarDrinks: ["Classic Paloma", "Oaxacan Margarita", "Salted grapefruit spritz"],
     bottleHints: ["mezcal", "grapefruit", "lime"],
   },
@@ -34,7 +34,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Equal-parts modern sour",
     taste:
-      "Flavor Notes: Bitter (2), Herbal (2), Citrus (3), Bourbon (2). Its flavor is bright and well-balanced, leading with sharp lemon citrus and bittersweet Aperol. The bourbon and amaro add warmth and herbal depth on the finish, creating a smooth yet lively sour.",
+      "Its flavor is bright and well-balanced, leading with sharp lemon citrus and bittersweet Aperol. The bourbon and amaro add warmth and herbal depth on the finish, creating a smooth yet lively sour.",
     similarDrinks: ["Bourbon Sour", "Boulevardier", "Last Word riff"],
     bottleHints: ["aperol", "amaro nonino", "lemon"],
   },
@@ -43,7 +43,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Sparkling citrus coupe",
     taste:
-      "Flavor Notes: Citrus (3), Floral (1), Dry (2), Sparkling (3). Its flavor is crisp and elegant, combining gin's botanical lift with bright lemon acidity. The champagne top adds a dry, effervescent finish that makes the whole drink feel light and celebratory.",
+      "Its flavor is crisp and elegant, combining gin's botanical lift with bright lemon acidity. The champagne top adds a dry, effervescent finish that makes the whole drink feel light and celebratory.",
     similarDrinks: ["Tom Collins", "Sparkling martini", "Citrus spritz"],
     bottleHints: ["gin", "lemon", "sparkling"],
   },
@@ -52,7 +52,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Smoky stirred sipper",
     taste:
-      "Flavor Notes: Smoky (3), Agave (2), Spice (2), Bitter (2). Its flavor is rich and complex, blending the earthy sweetness of agave with deep mezcal smoke. Aromatic bitters weave through each sip, leaving a long, warming finish with subtle spice.",
+      "Its flavor is rich and complex, blending the earthy sweetness of agave with deep mezcal smoke. Aromatic bitters weave through each sip, leaving a long, warming finish with subtle spice.",
     similarDrinks: ["Old Fashioned", "Tequila Manhattan", "Smoked Boulevardier"],
     bottleHints: ["tequila", "mezcal", "agave", "bitters"],
   },
@@ -61,7 +61,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: ["sbagliato"],
     style: "Bubbly bittersweet aperitivo",
     taste:
-      "Flavor Notes: Bitter (2), Sweet (2), Sparkling (3), Floral (1). Its flavor is bittersweet and lifted, with Campari's orange peel bitterness softened by sweet vermouth. Prosecco adds a floral sparkle that lightens the whole drink into something refreshingly quaffable.",
+      "Its flavor is bittersweet and lifted, with Campari's orange peel bitterness softened by sweet vermouth. Prosecco adds a floral sparkle that lightens the whole drink into something refreshingly quaffable.",
     similarDrinks: ["Negroni", "Americano", "Aperitif spritz"],
     bottleHints: ["campari", "vermouth", "prosecco"],
   },
@@ -70,7 +70,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Minted sparkling rum cocktail",
     taste:
-      "Flavor Notes: Mint (2), Lime (3), Rum (2), Sparkling (3). Its flavor is fresh and festive, with bright lime acidity and cooling mint balanced against the richness of aged rum. Champagne replaces the usual soda, adding a dry, bubbly elegance to the finish.",
+      "Its flavor is fresh and festive, with bright lime acidity and cooling mint balanced against the richness of aged rum. Champagne replaces the usual soda, adding a dry, bubbly elegance to the finish.",
     similarDrinks: ["Mojito", "French 75", "Daiquiri"],
     bottleHints: ["rum", "mint", "sparkling"],
   },
@@ -79,7 +79,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Equal-parts herbal sour",
     taste:
-      "Flavor Notes: Herbal (3), Cherry (2), Citrus (3), Gin (1). Its flavor is sharp and herbaceous, with green Chartreuse driving intense alpine complexity alongside tart lime. Maraschino adds a floral cherry sweetness that rounds the edges into a perfectly balanced sour.",
+      "Its flavor is sharp and herbaceous, with green Chartreuse driving intense alpine complexity alongside tart lime. Maraschino adds a floral cherry sweetness that rounds the edges into a perfectly balanced sour.",
     similarDrinks: ["Paper Plane", "Naked and Famous", "Bijou"],
     bottleHints: ["chartreuse", "maraschino", "gin", "lime"],
   },
@@ -88,7 +88,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Tropical tiki bitter",
     taste:
-      "Flavor Notes: Tropical (2), Bitter (3), Rum (2), Dry (2). Its flavor is a striking contrast of sweet and bitter, with juicy pineapple brightness cut through by Campari's bold bitterness. Dark rum ties it together, leaving a long, dry tropical finish.",
+      "Its flavor is a striking contrast of sweet and bitter, with juicy pineapple brightness cut through by Campari's bold bitterness. Dark rum ties it together, leaving a long, dry tropical finish.",
     similarDrinks: ["Negroni Tropicale", "Rum Negroni", "Golden Bird"],
     bottleHints: ["campari", "rum", "pineapple"],
   },
@@ -97,7 +97,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Smoky-peated modern sour",
     taste:
-      "Flavor Notes: Smoky (2), Ginger (2), Honey (2), Citrus (2). Its flavor is layered and warming, combining honey sweetness and ginger spice with bright lemon acidity. A float of peated Scotch drifts across the top, delivering hints of campfire smoke on the nose before each sip.",
+      "Its flavor is layered and warming, combining honey sweetness and ginger spice with bright lemon acidity. A float of peated Scotch drifts across the top, delivering hints of campfire smoke on the nose before each sip.",
     similarDrinks: ["Gold Rush", "Whisky Sour", "Bee's Knees"],
     bottleHints: ["scotch", "lemon", "ginger", "honey"],
   },
@@ -106,7 +106,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Creamy coffee cocktail",
     taste:
-      "Flavor Notes: Coffee (3), Bitter (2), Sweet (2), Creamy (2). Its flavor is rich and indulgent, leading with bold roasted espresso and the deep sweetness of coffee liqueur. Vodka keeps it clean, while a thick velvety foam on top delivers a smooth, lingering finish.",
+      "Its flavor is rich and indulgent, leading with bold roasted espresso and the deep sweetness of coffee liqueur. Vodka keeps it clean, while a thick velvety foam on top delivers a smooth, lingering finish.",
     similarDrinks: ["Black Russian", "Vodka Negroni", "White Russian"],
     bottleHints: ["vodka", "kahlua", "espresso"],
   },
