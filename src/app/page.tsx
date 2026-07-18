@@ -208,7 +208,7 @@ type RatingRow = {
   user_scans?: { bar_name: string | null; items: MenuItemAnalysis[] } | null;
 };
 
-function ProfileScreen({ user, onSignOut, onSignIn }: { user: User | null; onSignOut: () => void; onSignIn: () => void }) {
+function ProfileScreen({ user, onSignOut, onSignIn, refreshKey, onRatingSaved }: { user: User | null; onSignOut: () => void; onSignIn: () => void; refreshKey: number; onRatingSaved: () => void }) {
   const [ratings, setRatings] = useState<RatingRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedDrink, setSelectedDrink] = useState<{ drink: MenuItemAnalysis; barName?: string } | null>(null);
@@ -220,7 +220,7 @@ function ProfileScreen({ user, onSignOut, onSignIn }: { user: User | null; onSig
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setRatings(data); })
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [user, refreshKey]);
 
   function handleRatingTap(r: RatingRow) {
     const scan = r.user_scans;
@@ -938,7 +938,7 @@ function BottomNav({
 
 // ─── History screen placeholder ───────────────────────────────────────────────
 
-function HistoryScreen({ onSelect, user }: { onSelect: (scan: MenuAnalysis) => void; user: User | null }) {
+function HistoryScreen({ onSelect, user, refreshKey }: { onSelect: (scan: MenuAnalysis) => void; user: User | null; refreshKey: number }) {
   const [cloudScans, setCloudScans] = useState<MenuAnalysis[] | null>(null);
   const [loading, setLoading] = useState(false);
   const localHistory = loadHistory();
@@ -961,7 +961,7 @@ function HistoryScreen({ onSelect, user }: { onSelect: (scan: MenuAnalysis) => v
         }
       })
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [user, refreshKey]);
 
   const history = user ? (cloudScans ?? []) : localHistory;
 
@@ -1112,6 +1112,7 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [currentScanId, setCurrentScanId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load Supabase session on mount
@@ -1267,7 +1268,7 @@ export default function Home() {
       {/* Main content area */}
       <div className="flex-1 overflow-hidden relative">
         {activeTab === "history" ? (
-          <HistoryScreen onSelect={handleHistorySelect} user={user} />
+          <HistoryScreen onSelect={handleHistorySelect} user={user} refreshKey={refreshKey} />
         ) : activeTab === "catalog" ? (
           <CatalogScreen />
         ) : activeTab === "profile" ? (
@@ -1275,6 +1276,8 @@ export default function Home() {
             user={user}
             onSignOut={async () => { if (SUPABASE_CONFIGURED) await createClient().auth.signOut(); setUser(null); }}
             onSignIn={() => setShowAuth(true)}
+            refreshKey={refreshKey}
+            onRatingSaved={() => setRefreshKey(prev => prev + 1)}
           />
         ) : screen === "results" && analysis ? (
           <ResultsScreen
@@ -1285,6 +1288,7 @@ export default function Home() {
             user={user}
             onSave={async () => {
               await saveScanToAccount(analysis);
+              setRefreshKey(prev => prev + 1);
               setScreen("scan");
             }}
           />
