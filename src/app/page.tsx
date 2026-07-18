@@ -656,14 +656,22 @@ export default function Home() {
 
   async function runAnalysis(text: string) {
     setIsAnalyzing(true);
-    await new Promise((r) => setTimeout(r, 600));
-    const result = analyzeMenuText(text);
-    setAnalysis(result);
-    // Step 6b — Save to localStorage after analysis completes
-    saveResult(result);
-    setIsAnalyzing(false);
-    setScreen("results");
-    setActiveTab("scan");
+    try {
+      const body = new FormData();
+      body.append("text", text);
+      const res = await fetch("/api/analyze", { method: "POST", body });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Analysis failed");
+      const result = data as typeof data & { rawOcrText?: string };
+      setAnalysis(result);
+      saveResult(result);
+      setScreen("results");
+      setActiveTab("scan");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Analysis failed");
+    } finally {
+      setIsAnalyzing(false);
+    }
   }
 
   async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
