@@ -25,7 +25,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: ["paloma"],
     style: "Smoky citrus highball",
     taste:
-      "Flavor Notes: Smoky (3), Grapefruit (3), Lime (2), Saline (2). If you like a drink that's refreshing but has some character to it, this is your move — bold mezcal smoke balanced against bright grapefruit, with a squeeze of lime and just enough salt to make it pop.",
+      "Flavor Notes: Smoky (3), Grapefruit (3), Lime (2), Saline (2). Its flavor is bold and vibrant, opening with earthy mezcal smoke and a burst of bright grapefruit. The finish is crisp and dry, with a subtle salt edge that keeps every sip refreshing.",
     similarDrinks: ["Classic Paloma", "Oaxacan Margarita", "Salted grapefruit spritz"],
     bottleHints: ["mezcal", "grapefruit", "lime"],
   },
@@ -34,7 +34,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Equal-parts modern sour",
     taste:
-      "Flavor Notes: Bitter (2), Herbal (2), Citrus (3), Bourbon (2). Four equal parts — bourbon, Aperol, amaro, and lemon — that somehow add up to something better than any one of them alone. It's bright and citrusy up front, then a little bitter and warm on the way out.",
+      "Flavor Notes: Bitter (2), Herbal (2), Citrus (3), Bourbon (2). Its flavor is bright and well-balanced, leading with sharp lemon citrus and bittersweet Aperol. The bourbon and amaro add warmth and herbal depth on the finish, creating a smooth yet lively sour.",
     similarDrinks: ["Bourbon Sour", "Boulevardier", "Last Word riff"],
     bottleHints: ["aperol", "amaro nonino", "lemon"],
   },
@@ -43,7 +43,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Sparkling citrus coupe",
     taste:
-      "Flavor Notes: Citrus (3), Floral (1), Dry (2), Sparkling (3). Think of it as a Tom Collins that went to Paris — gin and lemon juice topped with champagne, served in a coupe. It's light, crisp, and a little fancy without being fussy.",
+      "Flavor Notes: Citrus (3), Floral (1), Dry (2), Sparkling (3). Its flavor is crisp and elegant, combining gin's botanical lift with bright lemon acidity. The champagne top adds a dry, effervescent finish that makes the whole drink feel light and celebratory.",
     similarDrinks: ["Tom Collins", "Sparkling martini", "Citrus spritz"],
     bottleHints: ["gin", "lemon", "sparkling"],
   },
@@ -52,7 +52,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Smoky stirred sipper",
     taste:
-      "Flavor Notes: Smoky (3), Agave (2), Spice (2), Bitter (2). It's like an Old Fashioned, but made with tequila and mezcal instead of whiskey — so you get that agave sweetness and a deep, earthy smokiness that lingers in the best possible way.",
+      "Flavor Notes: Smoky (3), Agave (2), Spice (2), Bitter (2). Its flavor is rich and complex, blending the earthy sweetness of agave with deep mezcal smoke. Aromatic bitters weave through each sip, leaving a long, warming finish with subtle spice.",
     similarDrinks: ["Old Fashioned", "Tequila Manhattan", "Smoked Boulevardier"],
     bottleHints: ["tequila", "mezcal", "agave", "bitters"],
   },
@@ -61,7 +61,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: ["sbagliato"],
     style: "Bubbly bittersweet aperitivo",
     taste:
-      "Flavor Notes: Bitter (2), Sweet (2), Sparkling (3), Floral (1). Someone accidentally grabbed the prosecco instead of gin — and honestly it was a great mistake. This is a Negroni with bubbles, making it lighter, more refreshing, and a little easier to love if you're not fully into bitter.",
+      "Flavor Notes: Bitter (2), Sweet (2), Sparkling (3), Floral (1). Its flavor is bittersweet and lifted, with Campari's orange peel bitterness softened by sweet vermouth. Prosecco adds a floral sparkle that lightens the whole drink into something refreshingly quaffable.",
     similarDrinks: ["Negroni", "Americano", "Aperitif spritz"],
     bottleHints: ["campari", "vermouth", "prosecco"],
   },
@@ -70,7 +70,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Minted sparkling rum cocktail",
     taste:
-      "Flavor Notes: Mint (2), Lime (3), Rum (2), Sparkling (3). Imagine a Mojito that decided to dress up — aged rum, fresh mint, and lime get topped with champagne instead of soda, making it feel festive and refined all at once.",
+      "Flavor Notes: Mint (2), Lime (3), Rum (2), Sparkling (3). Its flavor is fresh and festive, with bright lime acidity and cooling mint balanced against the richness of aged rum. Champagne replaces the usual soda, adding a dry, bubbly elegance to the finish.",
     similarDrinks: ["Mojito", "French 75", "Daiquiri"],
     bottleHints: ["rum", "mint", "sparkling"],
   },
@@ -79,7 +79,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Equal-parts herbal sour",
     taste:
-      "Flavor Notes: Herbal (3), Cherry (2), Citrus (3), Gin (1). This one's for the adventurous drinker — equal parts gin, green Chartreuse, maraschino, and lime make a drink that's herbaceous, sharp, tart, and a little mysterious all at once. Once you try it, you'll crave it.",
+      "Flavor Notes: Herbal (3), Cherry (2), Citrus (3), Gin (1). Its flavor is sharp and herbaceous, with green Chartreuse driving intense alpine complexity alongside tart lime. Maraschino adds a floral cherry sweetness that rounds the edges into a perfectly balanced sour.",
     similarDrinks: ["Paper Plane", "Naked and Famous", "Bijou"],
     bottleHints: ["chartreuse", "maraschino", "gin", "lime"],
   },
@@ -88,7 +88,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Tropical tiki bitter",
     taste:
-      "Flavor Notes: Tropical (2), Bitter (3), Rum (2), Dry (2). Pineapple and Campari shouldn't work together — but they really do. The sweetness of the pineapple plays against the bitterness of Campari, and dark rum ties it all together into something tropical but surprisingly dry on the finish.",
+      "Flavor Notes: Tropical (2), Bitter (3), Rum (2), Dry (2). Its flavor is a striking contrast of sweet and bitter, with juicy pineapple brightness cut through by Campari's bold bitterness. Dark rum ties it together, leaving a long, dry tropical finish.",
     similarDrinks: ["Negroni Tropicale", "Rum Negroni", "Golden Bird"],
     bottleHints: ["campari", "rum", "pineapple"],
   },
@@ -97,7 +97,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Smoky-peated modern sour",
     taste:
-      "Flavor Notes: Smoky (2), Ginger (2), Honey (2), Citrus (2). Honey and ginger syrup make it warming and a little spicy, lemon keeps it fresh, and then a float of peaty Scotch drifts across the top giving you this gorgeous whiff of smoke before each sip. It's more approachable than it sounds, promise.",
+      "Flavor Notes: Smoky (2), Ginger (2), Honey (2), Citrus (2). Its flavor is layered and warming, combining honey sweetness and ginger spice with bright lemon acidity. A float of peated Scotch drifts across the top, delivering hints of campfire smoke on the nose before each sip.",
     similarDrinks: ["Gold Rush", "Whisky Sour", "Bee's Knees"],
     bottleHints: ["scotch", "lemon", "ginger", "honey"],
   },
@@ -106,7 +106,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Creamy coffee cocktail",
     taste:
-      "Flavor Notes: Coffee (3), Bitter (2), Sweet (2), Creamy (2). Vodka, espresso, and coffee liqueur shaken hard until you get that thick, creamy foam on top — it's basically dessert in a glass. Bold coffee flavor, just sweet enough, with a smooth finish that'll keep you going all night.",
+      "Flavor Notes: Coffee (3), Bitter (2), Sweet (2), Creamy (2). Its flavor is rich and indulgent, leading with bold roasted espresso and the deep sweetness of coffee liqueur. Vodka keeps it clean, while a thick velvety foam on top delivers a smooth, lingering finish.",
     similarDrinks: ["Black Russian", "Vodka Negroni", "White Russian"],
     bottleHints: ["vodka", "kahlua", "espresso"],
   },

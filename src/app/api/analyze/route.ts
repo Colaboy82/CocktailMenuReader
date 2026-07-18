@@ -105,24 +105,22 @@ export async function POST(req: NextRequest) {
             similarDrinks: z.array(z.string()).max(3),
         })),
         }),
-        prompt: `You are an expert sommelier, bartender, and spirits specialist. You have access to the raw menu text.
+        prompt: `You are an expert sommelier and bartender.
 
 For each cocktail listed below, provide:
-1. A taste profile that includes:
-   - Specific flavor notes with intensity scale (1=subtle, 2=moderate, 3=strong). Format: "Citrus (2), Tropical (3), Herbal (1)"
-   - A conversational 2-3 sentence description in plain English (no jargon), as if explaining to someone new to cocktails. Be natural and vary your descriptions — don't use the same phrasing for each drink.
-   - Combine these: "Flavor Notes: [list]. [Your description]"
-2. A short style label with spirit base and strength estimate (e.g. "Gin-based · light & refreshing")
+1. A taste field combining:
+   - Specific flavor notes with intensity (1=subtle, 2=moderate, 3=strong). Format: "Citrus (2), Tropical (3), Herbal (1)"
+   - Two concise sentences: the first describes the overall flavor character (e.g. "Its flavor is balanced and nuanced, combining the warmth of whiskey with the sweetness of sugar and aromatic bitters."), the second describes what you experience through the sip (e.g. "The first sip delivers bright citrus, followed by hints of caramel and vanilla, with a smooth bold finish.")
+   - Combined format: "Flavor Notes: [list]. [Two sentences]"
+2. A short style label with spirit base and strength (e.g. "Gin-based · light & refreshing")
 3. Strength: "light", "medium", or "strong"
-4. Bar significance (if applicable): If the menu text suggests this is a house specialty, chef's creation, signature drink, made fresh in-house, or has special meaning to the bar, describe it in 1-2 short words/phrases. Examples: "House specialty", "Chef's creation", "Made daily", "Signature drink". Leave empty if not mentioned.
-5. 2-3 similar drinks to recommend
-
-Be conversational and approachable — explain tastes as if describing to someone who doesn't know cocktails.
+4. Bar significance (if the menu text suggests this is a house specialty, signature, or made in-house): 1-2 words/phrases. Leave empty if not mentioned.
+5. 2-3 similar drinks
 
 Menu text context:
 ${rawOcrText}
 
-Cocktails to describe:
+Cocktails:
 ${unknownDrinks.map((d) => d.name).join("\n")}`,
     });
 
