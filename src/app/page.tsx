@@ -606,7 +606,12 @@ function ResultsScreen({
   scanId: string | null;
   user: User | null;
 }) {
-  const [barName, setBarName] = useState((analysis as MenuAnalysis & { barName?: string }).barName ?? "");
+  const [barName, setBarName] = useState(() => {
+    // Initialize with default bar name (date-based)
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return (analysis as MenuAnalysis & { barName?: string }).barName ?? `${dateStr} menu`;
+  });
   const [editingBar, setEditingBar] = useState(false);
   const [barSaved, setBarSaved] = useState(false);
 
@@ -664,7 +669,7 @@ function ResultsScreen({
               className="flex items-center gap-1.5 text-xs text-slate-500 active:text-slate-300 transition-colors"
             >
               <span>📍</span>
-              <span>{barSaved && barName ? barName : "Add bar name"}</span>
+              <span>{barName}</span>
             </button>
           )}
         </div>
@@ -1061,10 +1066,14 @@ export default function Home() {
     if (!user) { saveResult(result); return; }
     // Save to Supabase
     try {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      const defaultBarName = `${dateStr} menu`;
+      
       const res = await fetch("/api/scans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, scan: result }),
+        body: JSON.stringify({ userId: user.id, scan: result, barName: defaultBarName }),
       });
       const data = await res.json();
       if (data.id) setCurrentScanId(data.id);
