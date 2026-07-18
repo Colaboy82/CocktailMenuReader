@@ -4,7 +4,6 @@ import { useState, useRef, type ChangeEvent, type ReactNode } from "react";
 import { MenuAnalysis, type MenuItemAnalysis } from "@/lib/types";
 import {
   analyzeMenuText,
-  sampleMenuText,
   cocktailProfiles,
 } from "@/lib/menu-analysis";
 import { saveResult, loadHistory, clearHistory } from "@/lib/history";
@@ -149,22 +148,6 @@ function DrinkSheet({
               Taste note
             </p>
             <p className="text-sm leading-7 text-slate-200">{drink.taste}</p>
-          </div>
-
-          {/* Confidence bar */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500">
-                Catalog match
-              </p>
-              <p className="text-xs text-slate-400">{pct}%</p>
-            </div>
-            <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#f7b267] to-[#ffd6a5] transition-all"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
           </div>
 
           {/* Strength */}
@@ -452,14 +435,6 @@ function ScanScreen({
             {error && (
               <p className="text-xs text-center text-red-400 px-2 leading-5">{error}</p>
             )}
-
-            <button
-              onClick={onSample}
-              disabled={isAnalyzing}
-              className="text-sm text-slate-500 underline underline-offset-4 active:text-slate-300 transition-colors disabled:opacity-40"
-            >
-              Try with a sample menu
-            </button>
           </div>
         ) : (
           /* ── Paste text view ──────────────────────────────────── */
@@ -828,10 +803,10 @@ export default function Home() {
             isAnalyzing={isAnalyzing}
             error={error}
             onFile={() => fileInputRef.current?.click()}
-            onSample={() => runAnalysis(sampleMenuText)}
+            onSample={() => {}}
             menuText={menuText}
             setMenuText={setMenuText}
-            onAnalyze={() => runAnalysis(menuText || sampleMenuText)}
+            onAnalyze={() => runAnalysis(menuText)}
           />
         )}
 

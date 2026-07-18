@@ -25,7 +25,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: ["paloma"],
     style: "Smoky citrus highball",
     taste:
-      "Flavor Notes: Smoky (3), Grapefruit (3), Lime (2), Saline (2). This drink opens with bold mezcal smoke and bright grapefruit that balance against each other beautifully. A squeeze of lime and a salt rim keep it crisp and sophisticated, making it the perfect aperitif.",
+      "Flavor Notes: Smoky (3), Grapefruit (3), Lime (2), Saline (2). If you like a drink that's refreshing but has some character to it, this is your move — bold mezcal smoke balanced against bright grapefruit, with a squeeze of lime and just enough salt to make it pop.",
     similarDrinks: ["Classic Paloma", "Oaxacan Margarita", "Salted grapefruit spritz"],
     bottleHints: ["mezcal", "grapefruit", "lime"],
   },
@@ -34,7 +34,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Equal-parts modern sour",
     taste:
-      "Flavor Notes: Bitter (2), Herbal (2), Citrus (3), Bourbon (2). A sophisticated balance of bourbon warmth, bittersweet Aperol, and herbal amaro—the lemon brings everything into sharp focus. This is a modern classic that rewards slow sipping.",
+      "Flavor Notes: Bitter (2), Herbal (2), Citrus (3), Bourbon (2). Four equal parts — bourbon, Aperol, amaro, and lemon — that somehow add up to something better than any one of them alone. It's bright and citrusy up front, then a little bitter and warm on the way out.",
     similarDrinks: ["Bourbon Sour", "Boulevardier", "Last Word riff"],
     bottleHints: ["aperol", "amaro nonino", "lemon"],
   },
@@ -43,7 +43,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Sparkling citrus coupe",
     taste:
-      "Flavor Notes: Citrus (3), Floral (1), Dry (2), Sparkling (3). Gin and champagne combine into something greater than the sum of their parts—crisp, effervescent, and supremely elegant. This drink feels as good as it tastes, making it perfect for any celebration.",
+      "Flavor Notes: Citrus (3), Floral (1), Dry (2), Sparkling (3). Think of it as a Tom Collins that went to Paris — gin and lemon juice topped with champagne, served in a coupe. It's light, crisp, and a little fancy without being fussy.",
     similarDrinks: ["Tom Collins", "Sparkling martini", "Citrus spritz"],
     bottleHints: ["gin", "lemon", "sparkling"],
   },
@@ -52,7 +52,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Smoky stirred sipper",
     taste:
-      "Flavor Notes: Smoky (3), Agave (2), Spice (2), Bitter (2). Two mezcal and tequila expressions intertwine with aromatic bitters to create something deeply rooted and complex. Each sip reveals new layers—perfect for those who appreciate a contemplative drink.",
+      "Flavor Notes: Smoky (3), Agave (2), Spice (2), Bitter (2). It's like an Old Fashioned, but made with tequila and mezcal instead of whiskey — so you get that agave sweetness and a deep, earthy smokiness that lingers in the best possible way.",
     similarDrinks: ["Old Fashioned", "Tequila Manhattan", "Smoked Boulevardier"],
     bottleHints: ["tequila", "mezcal", "agave", "bitters"],
   },
@@ -61,7 +61,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: ["sbagliato"],
     style: "Bubbly bittersweet aperitivo",
     taste:
-      "Flavor Notes: Bitter (2), Sweet (2), Sparkling (3), Floral (1). The sparkle in this drink transforms the traditional Negroni into something more approachable and social. Campari bitterness meets vermouth sweetness, then prosecco lifts it all into something luminous.",
+      "Flavor Notes: Bitter (2), Sweet (2), Sparkling (3), Floral (1). Someone accidentally grabbed the prosecco instead of gin — and honestly it was a great mistake. This is a Negroni with bubbles, making it lighter, more refreshing, and a little easier to love if you're not fully into bitter.",
     similarDrinks: ["Negroni", "Americano", "Aperitif spritz"],
     bottleHints: ["campari", "vermouth", "prosecco"],
   },
@@ -70,7 +70,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Minted sparkling rum cocktail",
     taste:
-      "Flavor Notes: Mint (2), Lime (3), Rum (2), Sparkling (3). Aged rum meets fresh mint and bright lime in this elegantly sparkling sipper. The champagne top gives it a sophisticated edge that keeps you reaching for another sip.",
+      "Flavor Notes: Mint (2), Lime (3), Rum (2), Sparkling (3). Imagine a Mojito that decided to dress up — aged rum, fresh mint, and lime get topped with champagne instead of soda, making it feel festive and refined all at once.",
     similarDrinks: ["Mojito", "French 75", "Daiquiri"],
     bottleHints: ["rum", "mint", "sparkling"],
   },
@@ -79,7 +79,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Equal-parts herbal sour",
     taste:
-      "Flavor Notes: Herbal (3), Cherry (2), Citrus (3), Gin (1). Four equal parts create an audacious balance of green Chartreuse, maraschino cherry, gin, and lime—sharp, complex, and utterly addictive. This is a drink for adventurous palates.",
+      "Flavor Notes: Herbal (3), Cherry (2), Citrus (3), Gin (1). This one's for the adventurous drinker — equal parts gin, green Chartreuse, maraschino, and lime make a drink that's herbaceous, sharp, tart, and a little mysterious all at once. Once you try it, you'll crave it.",
     similarDrinks: ["Paper Plane", "Naked and Famous", "Bijou"],
     bottleHints: ["chartreuse", "maraschino", "gin", "lime"],
   },
@@ -88,7 +88,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Tropical tiki bitter",
     taste:
-      "Flavor Notes: Tropical (2), Bitter (3), Rum (2), Dry (2). Sweet pineapple gets slashed by Campari bitterness in this tiki classic—it's a drink that doesn't apologize for its complexity. Dark rum anchors everything, and a lingering bitter finish keeps it memorable.",
+      "Flavor Notes: Tropical (2), Bitter (3), Rum (2), Dry (2). Pineapple and Campari shouldn't work together — but they really do. The sweetness of the pineapple plays against the bitterness of Campari, and dark rum ties it all together into something tropical but surprisingly dry on the finish.",
     similarDrinks: ["Negroni Tropicale", "Rum Negroni", "Golden Bird"],
     bottleHints: ["campari", "rum", "pineapple"],
   },
@@ -97,7 +97,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Smoky-peated modern sour",
     taste:
-      "Flavor Notes: Smoky (2), Ginger (2), Honey (2), Citrus (2). Blended Scotch provides the backbone, ginger brings warmth and spice, honey softens the edges, then a float of peated Islay Scotch arrives as smoke on the nose. Lemon keeps it bright—this is a complex drink with soul.",
+      "Flavor Notes: Smoky (2), Ginger (2), Honey (2), Citrus (2). Honey and ginger syrup make it warming and a little spicy, lemon keeps it fresh, and then a float of peaty Scotch drifts across the top giving you this gorgeous whiff of smoke before each sip. It's more approachable than it sounds, promise.",
     similarDrinks: ["Gold Rush", "Whisky Sour", "Bee's Knees"],
     bottleHints: ["scotch", "lemon", "ginger", "honey"],
   },
@@ -106,7 +106,7 @@ const cocktailProfiles: CocktailProfile[] = [
     aliases: [],
     style: "Creamy coffee cocktail",
     taste:
-      "Flavor Notes: Coffee (3), Bitter (2), Sweet (2), Creamy (2). Bold espresso meets vodka and coffee liqueur in this dessert-like sip. The result is a velvety, energizing drink with a gorgeous crema and a lingering roasted finish that keeps you coming back.",
+      "Flavor Notes: Coffee (3), Bitter (2), Sweet (2), Creamy (2). Vodka, espresso, and coffee liqueur shaken hard until you get that thick, creamy foam on top — it's basically dessert in a glass. Bold coffee flavor, just sweet enough, with a smooth finish that'll keep you going all night.",
     similarDrinks: ["Black Russian", "Vodka Negroni", "White Russian"],
     bottleHints: ["vodka", "kahlua", "espresso"],
   },
@@ -220,38 +220,6 @@ const flavorGroups: FlavorGroup[] = [
 
 export { cocktailProfiles };
 
-// ─── Sample data ──────────────────────────────────────────────────────────────
-
-export const sampleMenuText = [
-  "Old Fashioned | bourbon, sugar, bitters, orange",
-  "Margarita | tequila, lime, triple sec, agave",
-  "Daiquiri | rum, lime, sugar",
-  "Negroni | gin, Campari, sweet vermouth",
-  "Mojito | rum, mint, lime, sugar, soda",
-  "Whiskey Sour | bourbon, lemon, sugar, egg white",
-  "Cosmopolitan | vodka, triple sec, cranberry, lime",
-  "Manhattan | rye whiskey, sweet vermouth, bitters",
-  "Martini | gin or vodka, dry vermouth",
-  "Tom Collins | gin, lemon, sugar, soda",
-  "Mai Tai | rum, lime, orgeat, orange liqueur",
-  "Bloody Mary | vodka, tomato juice, spices",
-  "Pina Colada | rum, coconut cream, pineapple juice",
-  "Caipirinha | cachaça, lime, sugar",
-  "Sazerac | rye whiskey or cognac, absinthe rinse, bitters",
-  "Gimlet | gin or vodka, lime juice, simple syrup",
-  "Sidecar | cognac, triple sec, lemon juice",
-  "Aperol Spritz | Aperol, prosecco, soda",
-  "Mezcal Paloma | Del Maguey Vida mezcal, grapefruit, lime, agave, saline",
-  "Paper Plane | bourbon, Aperol, Amaro Nonino, lemon",
-  "French 75 | gin, lemon, sugar, Prosecco",
-  "Oaxacan Old Fashioned | reposado tequila, mezcal, agave, Angostura bitters",
-  "Negroni Sbagliato | Campari, sweet vermouth, Prosecco",
-  "Old Cuban | aged rum, mint, lime, sparkling wine, Angostura bitters",
-  "Last Word | gin, green Chartreuse, maraschino liqueur, lime",
-  "Jungle Bird | dark rum, Campari, pineapple, lime, simple syrup",
-  "Penicillin | blended Scotch, honey-ginger syrup, lemon, peated Islay float",
-  "Espresso Martini | vodka, Kahlúa, espresso, simple syrup",
-].join("\n");
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -322,12 +290,16 @@ function detectBottles(text: string): BottleMention[] {
 function parseLine(line: string): MenuItemAnalysis {
   const profile = findProfile(line);
   if (profile) {
+    // Match bottles from the library that are relevant to this specific cocktail profile
+    const profileBottles = bottleLibrary
+      .filter((b) => profile.bottleHints.some((hint) => lower(b.name).includes(hint) || hint.includes(lower(b.name.split(" ")[0]))))
+      .map((b) => b.name);
     return {
       name: profile.name,
       style: profile.style,
       taste: profile.taste,
       similarDrinks: profile.similarDrinks,
-      bottles: profile.bottleHints.filter((h) => lower(line).includes(h)),
+      bottles: profileBottles,
       confidence: 0.94,
       strength: estimateStrength(line),
       aiGenerated: false,
@@ -350,7 +322,8 @@ function parseLine(line: string): MenuItemAnalysis {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export function analyzeMenuText(text: string): MenuAnalysis {
-  const src = text.trim() || sampleMenuText;
+  const src = text.trim();
+  if (!src) return { summary: "0 drinks · 0 bottles", items: [], bottleMentions: [] };
   const lines = src
     .split(/\r?\n/)
     .map((l) => l.trim())
