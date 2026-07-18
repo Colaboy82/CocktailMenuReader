@@ -767,9 +767,40 @@ function BottomNav({
 
 // ─── History screen placeholder ───────────────────────────────────────────────
 
-function HistoryScreen({ onSelect }: { onSelect: (scan: MenuAnalysis) => void }) {
-  // Step 6c — Load and display saved results from localStorage
-  const history = loadHistory();
+function HistoryScreen({ onSelect, user }: { onSelect: (scan: MenuAnalysis) => void; user: User | null }) {
+  const [cloudScans, setCloudScans] = useState<MenuAnalysis[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const localHistory = loadHistory();
+
+  useEffect(() => {
+    if (!user) { setCloudScans(null); return; }
+    setLoading(true);
+    fetch(`/api/scans?userId=${user.id}`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setCloudScans(data.map((row: { id: string; scanned_at: string; summary: string; items: MenuAnalysis["items"]; bottle_mentions: MenuAnalysis["bottleMentions"]; raw_ocr_text: string }) => ({
+            id: row.id,
+            savedAt: new Date(row.scanned_at).getTime(),
+            summary: row.summary,
+            items: row.items ?? [],
+            bottleMentions: row.bottle_mentions ?? [],
+            rawOcrText: row.raw_ocr_text,
+          })));
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  const history = user ? (cloudScans ?? []) : localHistory;
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <IcSpinner cls="w-8 h-8 text-slate-500" />
+      </div>
+    );
+  }
 
   if (history.length === 0) {
     return (
@@ -795,18 +826,18 @@ function HistoryScreen({ onSelect }: { onSelect: (scan: MenuAnalysis) => void })
           Recent scans
         </h2>
         <p className="mt-3 text-sm text-slate-400 leading-7">
-          Up to {history.length} of 10 saved results.
+          {history.length} saved {history.length === 1 ? "scan" : "scans"}{user ? " in your account" : ""}.
         </p>
       </header>
       <div className="px-5 pb-8 space-y-3">
         {history.map((scan) => {
-          const date = new Date(scan.savedAt);
-          const daysAgo = Math.floor((Date.now() - scan.savedAt) / (1000 * 60 * 60 * 24));
+          const savedAt = (scan as MenuAnalysis & { savedAt?: number }).savedAt ?? Date.now();
+          const daysAgo = Math.floor((Date.now() - savedAt) / (1000 * 60 * 60 * 24));
           const dateStr = daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : `${daysAgo} days ago`;
 
           return (
             <button
-              key={scan.savedAt}
+              key={savedAt}
               onClick={() => onSelect(scan)}
               className="w-full text-left px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07] active:scale-[0.98] transition-transform"
             >
@@ -823,12 +854,14 @@ function HistoryScreen({ onSelect }: { onSelect: (scan: MenuAnalysis) => void })
             </button>
           );
         })}
-        <button
-          onClick={clearHistory}
-          className="w-full py-3 rounded-2xl bg-white/[0.04] border border-white/[0.07] text-slate-500 text-sm active:scale-[0.98] transition-transform mt-4"
-        >
-          Clear history
-        </button>
+        {!user && (
+          <button
+            onClick={clearHistory}
+            className="w-full py-3 rounded-2xl bg-white/[0.04] border border-white/[0.07] text-slate-500 text-sm active:scale-[0.98] transition-transform mt-4"
+          >
+            Clear history
+          </button>
+        )}
       </div>
     </div>
   );
@@ -1060,7 +1093,7 @@ export default function Home() {
       {/* Main content area */}
       <div className="flex-1 overflow-hidden relative">
         {activeTab === "history" ? (
-          <HistoryScreen onSelect={handleHistorySelect} />
+          <HistoryScreen onSelect={handleHistorySelect} user={user} />
         ) : activeTab === "catalog" ? (
           <CatalogScreen />
         ) : activeTab === "profile" ? (
