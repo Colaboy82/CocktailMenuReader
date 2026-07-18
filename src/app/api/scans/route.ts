@@ -42,6 +42,7 @@ export async function PATCH(req: NextRequest) {
     if (error) throw error;
     return NextResponse.json({ ok: true });
   } catch (err) {
+    console.error("[/api/scans PATCH] Error:", err);
     const message = err instanceof Error ? err.message : "Unexpected error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -63,6 +64,7 @@ export async function GET(req: NextRequest) {
     if (error) throw error;
     return NextResponse.json(data ?? []);
   } catch (err) {
+    console.error("[/api/scans GET] Error:", err);
     const message = err instanceof Error ? err.message : "Unexpected error";
     return NextResponse.json({ error: message }, { status: 500 });
   }

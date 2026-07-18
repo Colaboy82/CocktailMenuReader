@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     if (error) throw error;
     return NextResponse.json({ ok: true });
   } catch (err) {
+    console.error("[/api/ratings POST] Error:", err);
     const message = err instanceof Error ? err.message : "Unexpected error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -61,6 +62,7 @@ export async function GET(req: NextRequest) {
     if (error) throw error;
     return NextResponse.json(data ?? []);
   } catch (err) {
+    console.error("[/api/ratings GET] Error:", err);
     const message = err instanceof Error ? err.message : "Unexpected error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
