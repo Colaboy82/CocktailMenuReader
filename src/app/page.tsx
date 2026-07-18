@@ -200,9 +200,18 @@ function StarRating({ value, onChange }: { value: number; onChange: (stars: numb
 
 // ─── Profile screen ───────────────────────────────────────────────────────────
 
+type RatingRow = {
+  cocktail_name: string;
+  stars: number;
+  rated_at: string;
+  scan_id: string | null;
+  user_scans?: { bar_name: string | null; items: MenuItemAnalysis[] } | null;
+};
+
 function ProfileScreen({ user, onSignOut, onSignIn }: { user: User | null; onSignOut: () => void; onSignIn: () => void }) {
-  const [ratings, setRatings] = useState<Array<{ cocktail_name: string; stars: number; rated_at: string }>>([]);
+  const [ratings, setRatings] = useState<RatingRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedDrink, setSelectedDrink] = useState<{ drink: MenuItemAnalysis; barName?: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -213,17 +222,30 @@ function ProfileScreen({ user, onSignOut, onSignIn }: { user: User | null; onSig
       .finally(() => setLoading(false));
   }, [user]);
 
+  function handleRatingTap(r: RatingRow) {
+    const scan = r.user_scans;
+    const drink = scan?.items?.find((i: MenuItemAnalysis) => i.name.toLowerCase() === r.cocktail_name.toLowerCase());
+    if (drink) {
+      setSelectedDrink({ drink, barName: scan?.bar_name ?? undefined });
+    } else {
+      // Fallback: construct minimal drink from rating data
+      setSelectedDrink({
+        drink: { name: r.cocktail_name, style: "", taste: "", similarDrinks: [], bottles: [], confidence: 0, strength: "medium", aiGenerated: false },
+        barName: scan?.bar_name ?? undefined,
+      });
+    }
+  }
+
   // Compute flavor profile from ratings
   const flavorProfile = (() => {
     if (ratings.length === 0) return null;
     const styleMap: Record<string, number> = {};
     for (const r of ratings) {
-      const profile = cocktailProfiles.find(p => p.name.toLowerCase() === r.cocktail_name.toLowerCase());
-      if (profile) {
-        const words = profile.style.toLowerCase().split(/[\s·,]+/).filter(w => w.length > 3);
-        for (const w of words) {
-          styleMap[w] = (styleMap[w] ?? 0) + r.stars;
-        }
+      const scanDrink = r.user_scans?.items?.find((i: MenuItemAnalysis) => i.name.toLowerCase() === r.cocktail_name.toLowerCase());
+      const styleText = scanDrink?.style ?? cocktailProfiles.find(p => p.name.toLowerCase() === r.cocktail_name.toLowerCase())?.style ?? "";
+      const words = styleText.toLowerCase().split(/[\s·,]+/).filter((w: string) => w.length > 3);
+      for (const w of words) {
+        styleMap[w] = (styleMap[w] ?? 0) + r.stars;
       }
     }
     const top = Object.entries(styleMap).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => k);
@@ -244,7 +266,7 @@ function ProfileScreen({ user, onSignOut, onSignIn }: { user: User | null; onSig
   }
 
   return (
-    <div className="h-full flex flex-col overflow-y-auto no-scrollbar">
+    <div className="h-full flex flex-col overflow-y-auto no-scrollbar relative">
       <header className="px-6 pt-6 pb-4 flex-shrink-0">
         <p className="text-[10px] uppercase tracking-widest text-slate-500">Account</p>
         <h2 className="mt-2 text-3xl text-white leading-tight tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
@@ -274,19 +296,33 @@ function ProfileScreen({ user, onSignOut, onSignIn }: { user: User | null; onSig
         </div>
 
         {/* Ratings history */}
-        {ratings.length > 0 && (
+        {(loading || ratings.length > 0) && (
           <div>
             <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-3 px-1">Rated Cocktails</p>
-            <div className="space-y-2">
-              {loading ? (
-                <p className="text-sm text-slate-500 px-1">Loading…</p>
-              ) : ratings.map(r => (
-                <div key={r.cocktail_name} className="flex items-center justify-between px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/[0.07]">
-                  <p className="text-sm text-slate-200 truncate flex-1 mr-3">{r.cocktail_name}</p>
-                  <span className="text-sm text-[var(--app-accent)] flex-shrink-0">{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</span>
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <p className="text-sm text-slate-500 px-1">Loading…</p>
+            ) : (
+              <div className="space-y-2">
+                {ratings.map(r => (
+                  <button
+                    key={r.cocktail_name}
+                    onClick={() => handleRatingTap(r)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/[0.07] active:scale-[0.98] transition-transform text-left"
+                  >
+                    <div className="flex-1 min-w-0 mr-3">
+                      <p className="text-sm text-slate-200 truncate">{r.cocktail_name}</p>
+                      {r.user_scans?.bar_name && (
+                        <p className="text-[10px] text-slate-500 mt-0.5">📍 {r.user_scans.bar_name}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-sm text-[var(--app-accent)]">{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</span>
+                      <IcRight cls="w-3.5 h-3.5 text-slate-500" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -298,6 +334,17 @@ function ProfileScreen({ user, onSignOut, onSignIn }: { user: User | null; onSig
           Sign out
         </button>
       </div>
+
+      {/* Drink detail sheet from rating tap */}
+      {selectedDrink && (
+        <DrinkSheet
+          drink={selectedDrink.drink}
+          onClose={() => setSelectedDrink(null)}
+          user={user}
+          scanId={null}
+          barName={selectedDrink.barName}
+        />
+      )}
     </div>
   );
 }
@@ -309,11 +356,13 @@ function DrinkSheet({
   onClose,
   user,
   scanId,
+  barName,
 }: {
   drink: MenuItemAnalysis;
   onClose: () => void;
   user: User | null;
   scanId: string | null;
+  barName?: string;
 }) {
   const [rating, setRating] = useState(0);
 
@@ -379,6 +428,11 @@ function DrinkSheet({
               {drink.barSignificance && (
                 <span className="inline-block px-3 py-1 rounded-full text-[11px] uppercase tracking-widest border border-[rgba(247,178,103,0.25)] bg-[rgba(247,178,103,0.12)] text-[var(--app-accent)]">
                   ★ {drink.barSignificance}
+                </span>
+              )}
+              {barName && (
+                <span className="inline-block px-3 py-1 rounded-full text-[11px] border border-white/[0.1] bg-white/[0.05] text-slate-400">
+                  📍 {barName}
                 </span>
               )}
             </div>
@@ -543,11 +597,30 @@ function ResultsScreen({
   analysis,
   onBack,
   onDrinkTap,
+  scanId,
+  user,
 }: {
   analysis: MenuAnalysis;
   onBack: () => void;
   onDrinkTap: (d: MenuItemAnalysis) => void;
+  scanId: string | null;
+  user: User | null;
 }) {
+  const [barName, setBarName] = useState((analysis as MenuAnalysis & { barName?: string }).barName ?? "");
+  const [editingBar, setEditingBar] = useState(false);
+  const [barSaved, setBarSaved] = useState(false);
+
+  async function saveBarName() {
+    if (!scanId || !barName.trim()) return;
+    await fetch("/api/scans", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scanId, barName: barName.trim() }),
+    });
+    setEditingBar(false);
+    setBarSaved(true);
+  }
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -568,6 +641,34 @@ function ResultsScreen({
           </p>
         </div>
       </header>
+
+      {/* Bar name tag */}
+      {user && scanId && (
+        <div className="px-5 pb-2 flex-shrink-0">
+          {editingBar ? (
+            <div className="flex gap-2">
+              <input
+                value={barName}
+                onChange={e => setBarName(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && saveBarName()}
+                placeholder="Bar or restaurant name"
+                autoFocus
+                className="flex-1 px-3 py-2 rounded-xl bg-black/30 border border-white/10 text-sm text-white outline-none focus:border-[rgba(247,178,103,0.4)]"
+              />
+              <button onClick={saveBarName} className="px-3 py-2 rounded-xl bg-[rgba(247,178,103,0.15)] text-[var(--app-accent)] text-sm">Save</button>
+              <button onClick={() => setEditingBar(false)} className="px-3 py-2 rounded-xl bg-white/[0.05] text-slate-400 text-sm">✕</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setEditingBar(true)}
+              className="flex items-center gap-1.5 text-xs text-slate-500 active:text-slate-300 transition-colors"
+            >
+              <span>📍</span>
+              <span>{barSaved && barName ? barName : "Add bar name"}</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Scrollable cards */}
       <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4 space-y-3">
@@ -1107,6 +1208,8 @@ export default function Home() {
             analysis={analysis}
             onBack={() => setScreen("scan")}
             onDrinkTap={setSelectedDrink}
+            scanId={currentScanId}
+            user={user}
           />
         ) : pageState === "reviewing" ? (
           /* ── Step 5b — Review screen ────────────────────────────── */

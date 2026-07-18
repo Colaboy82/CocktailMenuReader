@@ -36,7 +36,13 @@ export async function GET(req: NextRequest) {
     const supabase = createServiceClient();
     const { data, error } = await supabase
       .from("user_ratings")
-      .select("cocktail_name, stars, rated_at")
+      .select(`
+        cocktail_name,
+        stars,
+        rated_at,
+        scan_id,
+        user_scans ( bar_name, items )
+      `)
       .eq("user_id", userId)
       .order("rated_at", { ascending: false });
 

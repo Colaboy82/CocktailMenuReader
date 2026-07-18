@@ -22,6 +22,7 @@ create table if not exists user_scans (
   user_id       uuid not null references auth.users(id) on delete cascade,
   scanned_at    timestamptz default now(),
   summary       text,
+  bar_name      text,
   raw_ocr_text  text,
   items         jsonb,
   bottle_mentions jsonb
