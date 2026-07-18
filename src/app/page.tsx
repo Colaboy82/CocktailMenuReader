@@ -7,7 +7,7 @@ import {
   cocktailProfiles,
 } from "@/lib/menu-analysis";
 import { saveResult, loadHistory, clearHistory } from "@/lib/history";
-import { createClient } from "@/lib/supabase";
+import { createClient, SUPABASE_CONFIGURED } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -111,6 +111,7 @@ function AuthModal({ onClose, onAuth }: { onClose: () => void; onAuth: (user: Us
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!SUPABASE_CONFIGURED) { setError("Auth not configured yet."); return; }
     setLoading(true);
     setError(null);
     const supabase = createClient();
@@ -911,6 +912,7 @@ export default function Home() {
 
   // Load Supabase session on mount
   useEffect(() => {
+    if (!SUPABASE_CONFIGURED) return;
     const supabase = createClient();
     supabase.auth.getSession().then(({ data }) => {
       setUser(data.session?.user ?? null);
@@ -1064,7 +1066,7 @@ export default function Home() {
         ) : activeTab === "profile" ? (
           <ProfileScreen
             user={user}
-            onSignOut={async () => { await createClient().auth.signOut(); setUser(null); }}
+            onSignOut={async () => { if (SUPABASE_CONFIGURED) await createClient().auth.signOut(); setUser(null); }}
             onSignIn={() => setShowAuth(true)}
           />
         ) : screen === "results" && analysis ? (
