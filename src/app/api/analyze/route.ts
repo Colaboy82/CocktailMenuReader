@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateText, generateObject } from "ai";
-import { google } from "@ai-sdk/google";     // Gemini: OCR + AI enrichment
+import { google } from "@ai-sdk/google";
 import { analyzeMenuText } from "@/lib/menu-analysis";
+import { createServiceClient } from "@/lib/supabase-server";
 import { z } from "zod";
 import { MenuAnalysis } from "@/lib/types";
 
@@ -89,22 +90,60 @@ export async function POST(req: NextRequest) {
     const analysis = analyzeMenuText(rawOcrText);
 
     // Always enrich all drinks with AI-generated descriptions.
-    const unknownDrinks = analysis.items;
+    const allDrinks = analysis.items;
 
-    if (unknownDrinks.length > 0) {
-    const { object } = await generateObject({
-        model: google("gemini-2.5-flash"),
-        schema: z.object({
-        drinks: z.array(z.object({
-            name: z.string(),
-            taste: z.string(),
-            style: z.string(),
-            strength: z.enum(["light", "medium", "strong"]),
-            barSignificance: z.string().optional(),
-            similarDrinks: z.array(z.string()).max(3),
-        })),
-        }),
-        prompt: `You are an expert sommelier and bartender helping someone unfamiliar with cocktails understand what they're ordering.
+    if (allDrinks.length > 0) {
+      // ── Phase 1: Check global cocktail cache ──────────────────────────────
+      const supabase = createServiceClient();
+      const nameKeys = allDrinks.map((d) => d.name.toLowerCase().trim());
+
+      let cachedMap: Record<string, { taste: string; style: string; strength: string; similar_drinks: string[] }> = {};
+
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        const { data: cached } = await supabase
+          .from("cocktail_cache")
+          .select("name_key, taste, style, strength, similar_drinks")
+          .in("name_key", nameKeys);
+
+        if (cached) {
+          for (const row of cached) {
+            cachedMap[row.name_key] = row;
+            // Increment hit count in background (don't await)
+            supabase.from("cocktail_cache").update({ hit_count: supabase.rpc("increment", { x: 1 }) }).eq("name_key", row.name_key).then(() => {});
+          }
+        }
+      }
+
+      // Apply cached results immediately
+      for (const drink of allDrinks) {
+        const key = drink.name.toLowerCase().trim();
+        const hit = cachedMap[key];
+        if (hit) {
+          drink.taste = hit.taste;
+          drink.style = hit.style;
+          drink.strength = hit.strength;
+          drink.similarDrinks = hit.similar_drinks;
+          drink.aiGenerated = true;
+        }
+      }
+
+      // ── Phase 2: Enrich remaining drinks with Gemini ──────────────────────
+      const needsEnrichment = allDrinks.filter((d) => !cachedMap[d.name.toLowerCase().trim()]);
+
+      if (needsEnrichment.length > 0) {
+        const { object } = await generateObject({
+          model: google("gemini-2.5-flash"),
+          schema: z.object({
+            drinks: z.array(z.object({
+              name: z.string(),
+              taste: z.string(),
+              style: z.string(),
+              strength: z.enum(["light", "medium", "strong"]),
+              barSignificance: z.string().optional(),
+              similarDrinks: z.array(z.string()).max(3),
+            })),
+          }),
+          prompt: `You are an expert sommelier and bartender helping someone unfamiliar with cocktails understand what they're ordering.
 
 For each cocktail listed below, provide:
 1. taste: Exactly 2 sentences in plain, conversational English. No jargon. The first sentence describes the overall flavor character (e.g. "Its flavor is balanced and smooth, blending the warmth of whiskey with a touch of sweetness and aromatic bitters."). The second describes what you taste through the sip (e.g. "You'll notice hints of caramel and vanilla up front, with a subtle spice and a clean, lingering finish."). Do NOT use comma-separated adjective lists like "bright, zesty, fresh" — write full sentences.
@@ -117,21 +156,40 @@ Menu text:
 ${rawOcrText}
 
 Cocktails:
-${unknownDrinks.map((d) => `- ${d.name}${d.rawLine && d.rawLine !== d.name ? ` (menu: "${d.rawLine}")` : ""}`).join("\n")}`,
-    });
+${needsEnrichment.map((d) => `- ${d.name}${d.rawLine && d.rawLine !== d.name ? ` (menu: "${d.rawLine}")` : ""}`).join("\n")}`,
+        });
 
-    for (const aiDrink of object.drinks) {
-        const match = analysis.items.find((item) => item.name === aiDrink.name);
-        if (match) {
-        match.taste = aiDrink.taste;
-        match.style = aiDrink.style;
-        match.strength = aiDrink.strength;
-        if (aiDrink.barSignificance) {
-            match.barSignificance = aiDrink.barSignificance;
+        const cacheInserts: Array<{ name: string; name_key: string; taste: string; style: string; strength: string; similar_drinks: string[] }> = [];
+
+        for (const aiDrink of object.drinks) {
+          const match = analysis.items.find(
+            (item) => item.name.toLowerCase().trim() === aiDrink.name.toLowerCase().trim()
+          );
+          if (match) {
+            match.taste = aiDrink.taste;
+            match.style = aiDrink.style;
+            match.strength = aiDrink.strength;
+            if (aiDrink.barSignificance) match.barSignificance = aiDrink.barSignificance;
+            match.similarDrinks = aiDrink.similarDrinks;
+            match.aiGenerated = true;
+
+            // Queue for cache write
+            cacheInserts.push({
+              name: match.name,
+              name_key: match.name.toLowerCase().trim(),
+              taste: aiDrink.taste,
+              style: aiDrink.style,
+              strength: aiDrink.strength,
+              similar_drinks: aiDrink.similarDrinks,
+            });
+          }
         }
-        match.similarDrinks = aiDrink.similarDrinks;
+
+        // Write new drinks to cache (upsert — don't fail if duplicate)
+        if (cacheInserts.length > 0 && process.env.NEXT_PUBLIC_SUPABASE_URL) {
+          supabase.from("cocktail_cache").upsert(cacheInserts, { onConflict: "name_key" }).then(() => {});
         }
-    }
+      }
     }
 
 

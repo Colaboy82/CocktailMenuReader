@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent, type ReactNode } from "react";
+import { useState, useRef, useEffect, type ChangeEvent, type ReactNode } from "react";
 import { MenuAnalysis, type MenuItemAnalysis } from "@/lib/types";
 import {
   analyzeMenuText,
   cocktailProfiles,
 } from "@/lib/menu-analysis";
 import { saveResult, loadHistory, clearHistory } from "@/lib/history";
+import { createClient } from "@/lib/supabase";
+import type { User } from "@supabase/supabase-js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Screen = "scan" | "results";
-type Tab = "scan" | "history" | "catalog";
+type Tab = "scan" | "history" | "catalog" | "profile";
 
 // ─── SVG icons (no extra deps) ────────────────────────────────────────────────
 
@@ -81,6 +83,14 @@ function IcInfo({ cls = "w-6 h-6" }: { cls?: string }) {
     </svg>
   );
 }
+function IcUser({ cls = "w-6 h-6" }: { cls?: string }) {
+  return (
+    <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
 function IcSpinner({ cls = "w-10 h-10" }: { cls?: string }) {
   return (
     <svg className={`${cls} spin`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -89,15 +99,246 @@ function IcSpinner({ cls = "w-10 h-10" }: { cls?: string }) {
   );
 }
 
+// ─── Auth Modal ───────────────────────────────────────────────────────────────
+
+function AuthModal({ onClose, onAuth }: { onClose: () => void; onAuth: (user: User) => void }) {
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const supabase = createClient();
+    if (mode === "signup") {
+      const { error: err } = await supabase.auth.signUp({ email, password });
+      if (err) setError(err.message);
+      else setSuccess("Check your email to confirm your account, then sign in.");
+    } else {
+      const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
+      if (err) setError(err.message);
+      else if (data.user) { onAuth(data.user); onClose(); }
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div className="absolute inset-0 z-50 flex flex-col justify-end">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-[#0f1628] rounded-t-[2.5rem] flex flex-col sheet-enter px-6 pb-10 pt-4">
+        <div className="flex justify-center mb-4">
+          <div className="w-10 h-1 rounded-full bg-white/20" />
+        </div>
+        <button onClick={onClose} className="absolute top-4 right-5 p-1 text-slate-400"><IcX /></button>
+        <h2 className="text-2xl text-white mb-1" style={{ fontFamily: "var(--font-display)" }}>
+          {mode === "signin" ? "Welcome back" : "Create account"}
+        </h2>
+        <p className="text-sm text-slate-400 mb-6">
+          {mode === "signin" ? "Sign in to access your scans and ratings." : "Save your scans and build your flavor profile."}
+        </p>
+        {success ? (
+          <p className="text-sm text-[var(--app-mint)] leading-6">{success}</p>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <input
+              type="email" value={email} onChange={e => setEmail(e.target.value)}
+              placeholder="Email" required
+              className="w-full px-4 py-3 rounded-2xl bg-black/30 border border-white/10 text-sm text-white outline-none focus:border-[rgba(247,178,103,0.4)] transition-colors"
+            />
+            <input
+              type="password" value={password} onChange={e => setPassword(e.target.value)}
+              placeholder="Password" required minLength={6}
+              className="w-full px-4 py-3 rounded-2xl bg-black/30 border border-white/10 text-sm text-white outline-none focus:border-[rgba(247,178,103,0.4)] transition-colors"
+            />
+            {error && <p className="text-xs text-red-400">{error}</p>}
+            <button
+              type="submit" disabled={loading}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#f7b267] to-[#ffd6a5] text-slate-950 font-semibold text-sm disabled:opacity-60"
+            >
+              {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
+            </button>
+          </form>
+        )}
+        <p className="mt-4 text-xs text-center text-slate-500">
+          {mode === "signin" ? "No account? " : "Already have one? "}
+          <button onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(null); setSuccess(null); }}
+            className="text-[var(--app-accent)] underline underline-offset-2">
+            {mode === "signin" ? "Sign up" : "Sign in"}
+          </button>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Star rating ──────────────────────────────────────────────────────────────
+
+function StarRating({ value, onChange }: { value: number; onChange: (stars: number) => void }) {
+  const [hover, setHover] = useState(0);
+  return (
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <button
+          key={s}
+          onClick={() => onChange(s)}
+          onMouseEnter={() => setHover(s)}
+          onMouseLeave={() => setHover(0)}
+          className="text-2xl leading-none transition-transform active:scale-90"
+          aria-label={`${s} star${s !== 1 ? "s" : ""}`}
+        >
+          <span className={(hover || value) >= s ? "text-[var(--app-accent)]" : "text-white/20"}>★</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── Profile screen ───────────────────────────────────────────────────────────
+
+function ProfileScreen({ user, onSignOut, onSignIn }: { user: User | null; onSignOut: () => void; onSignIn: () => void }) {
+  const [ratings, setRatings] = useState<Array<{ cocktail_name: string; stars: number; rated_at: string }>>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    setLoading(true);
+    fetch(`/api/ratings?userId=${user.id}`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setRatings(data); })
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  // Compute flavor profile from ratings
+  const flavorProfile = (() => {
+    if (ratings.length === 0) return null;
+    const styleMap: Record<string, number> = {};
+    for (const r of ratings) {
+      const profile = cocktailProfiles.find(p => p.name.toLowerCase() === r.cocktail_name.toLowerCase());
+      if (profile) {
+        const words = profile.style.toLowerCase().split(/[\s·,]+/).filter(w => w.length > 3);
+        for (const w of words) {
+          styleMap[w] = (styleMap[w] ?? 0) + r.stars;
+        }
+      }
+    }
+    const top = Object.entries(styleMap).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => k);
+    return top.length ? top : null;
+  })();
+
+  if (!user) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center px-8 gap-4">
+        <IcUser cls="w-12 h-12 text-slate-600" />
+        <p className="text-base text-white font-medium">No account yet</p>
+        <p className="text-sm text-slate-400 text-center leading-6">Sign in to save your scans, rate cocktails, and build your personal flavor profile.</p>
+        <button onClick={onSignIn} className="mt-2 px-8 py-3 rounded-2xl bg-gradient-to-r from-[#f7b267] to-[#ffd6a5] text-slate-950 font-semibold text-sm">
+          Sign in / Create account
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full flex flex-col overflow-y-auto no-scrollbar">
+      <header className="px-6 pt-6 pb-4 flex-shrink-0">
+        <p className="text-[10px] uppercase tracking-widest text-slate-500">Account</p>
+        <h2 className="mt-2 text-3xl text-white leading-tight tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
+          Your Profile
+        </h2>
+        <p className="mt-1 text-xs text-slate-500 truncate">{user.email}</p>
+      </header>
+
+      <div className="px-5 pb-8 space-y-5">
+        {/* Flavor profile */}
+        <div className="px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07]">
+          <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-3">Taste Profile</p>
+          {flavorProfile ? (
+            <>
+              <p className="text-sm text-slate-200 leading-6">
+                You tend to enjoy <span className="text-[var(--app-accent)]">{flavorProfile.join(", ")}</span> cocktails.
+              </p>
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {flavorProfile.map(tag => (
+                  <span key={tag} className="text-[10px] px-2.5 py-1 rounded-full bg-[rgba(247,178,103,0.12)] text-[var(--app-accent)] border border-[rgba(247,178,103,0.2)]">{tag}</span>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-slate-400">Rate some cocktails to build your profile.</p>
+          )}
+        </div>
+
+        {/* Ratings history */}
+        {ratings.length > 0 && (
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-3 px-1">Rated Cocktails</p>
+            <div className="space-y-2">
+              {loading ? (
+                <p className="text-sm text-slate-500 px-1">Loading…</p>
+              ) : ratings.map(r => (
+                <div key={r.cocktail_name} className="flex items-center justify-between px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/[0.07]">
+                  <p className="text-sm text-slate-200 truncate flex-1 mr-3">{r.cocktail_name}</p>
+                  <span className="text-sm text-[var(--app-accent)] flex-shrink-0">{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Sign out */}
+        <button
+          onClick={onSignOut}
+          className="w-full py-3 rounded-2xl border border-white/[0.07] text-slate-400 text-sm active:text-white transition-colors"
+        >
+          Sign out
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Drink detail bottom sheet ────────────────────────────────────────────────
 
 function DrinkSheet({
   drink,
   onClose,
+  user,
+  scanId,
 }: {
   drink: MenuItemAnalysis;
   onClose: () => void;
+  user: User | null;
+  scanId: string | null;
 }) {
+  const [rating, setRating] = useState(0);
+
+  // Load existing rating if user is signed in
+  useEffect(() => {
+    if (!user) return;
+    fetch(`/api/ratings?userId=${user.id}`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const existing = data.find((r: { cocktail_name: string }) => r.cocktail_name.toLowerCase() === drink.name.toLowerCase());
+          if (existing) setRating(existing.stars);
+        }
+      });
+  }, [user, drink.name]);
+
+  async function handleRating(stars: number) {
+    setRating(stars);
+    if (!user) return;
+    await fetch("/api/ratings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id, cocktailName: drink.name, stars, scanId }),
+    });
+  }
+
   const pct = Math.round(drink.confidence * 100);
   return (
     <div className="absolute inset-0 z-50 flex flex-col justify-end">
@@ -206,6 +447,18 @@ function DrinkSheet({
               </div>
             </div>
           )}
+
+          {/* Rating */}
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-3">
+              {user ? "Your rating" : "Rate this drink"}
+            </p>
+            {user ? (
+              <StarRating value={rating} onChange={handleRating} />
+            ) : (
+              <p className="text-xs text-slate-500">Sign in to rate cocktails and build your flavor profile.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -482,6 +735,7 @@ function BottomNav({
     { id: "scan", label: "Scan", icon: <IcScan /> },
     { id: "history", label: "History", icon: <IcHistory /> },
     { id: "catalog", label: "Catalog", icon: <IcText /> },
+    { id: "profile", label: "Profile", icon: <IcUser /> },
   ];
 
   return (
@@ -648,11 +902,41 @@ export default function Home() {
   const [menuText, setMenuText] = useState("");
   const [analysis, setAnalysis] = useState<MenuAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  // null = no error. A string = the last request failed and should be shown in the UI.
-  // The error is cleared on the next analysis attempt.
   const [error, setError] = useState<string | null>(null);
   const [selectedDrink, setSelectedDrink] = useState<MenuItemAnalysis | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [showAuth, setShowAuth] = useState(false);
+  const [currentScanId, setCurrentScanId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load Supabase session on mount
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function saveScanToAccount(result: MenuAnalysis) {
+    if (!user) { saveResult(result); return; }
+    // Save to Supabase
+    try {
+      const res = await fetch("/api/scans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, scan: result }),
+      });
+      const data = await res.json();
+      if (data.id) setCurrentScanId(data.id);
+    } catch {
+      // Fallback to localStorage if Supabase save fails
+      saveResult(result);
+    }
+  }
 
   async function runAnalysis(text: string) {
     setIsAnalyzing(true);
@@ -664,7 +948,8 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error || "Analysis failed");
       const result = data as typeof data & { rawOcrText?: string };
       setAnalysis(result);
-      saveResult(result);
+      setCurrentScanId(null);
+      await saveScanToAccount(result);
       setScreen("results");
       setActiveTab("scan");
     } catch (err) {
@@ -712,8 +997,8 @@ export default function Home() {
         } else {
           // Fallback: if no OCR text, go straight to results
           setAnalysis(data);
-          // Step 6b — Save to localStorage after upload analysis completes
-          saveResult(data);
+          setCurrentScanId(null);
+          await saveScanToAccount(data);
           setScreen("results");
         }
       }
@@ -759,8 +1044,14 @@ export default function Home() {
         <span className="text-[11px] font-medium text-slate-400">{timeStr}</span>
         {/* Notch pill */}
         <div className="w-28 h-[1.375rem] bg-[#090d1a] rounded-full" />
-        <div className="flex items-center gap-1">
-          <span className="text-[11px] text-slate-400">●●●</span>
+        <div className="flex items-center gap-2">
+          {user ? (
+            <button onClick={() => setActiveTab("profile")} className="w-6 h-6 rounded-full bg-[rgba(247,178,103,0.3)] flex items-center justify-center" aria-label="Profile">
+              <span className="text-[9px] font-bold text-[var(--app-accent)]">{user.email?.[0].toUpperCase()}</span>
+            </button>
+          ) : (
+            <button onClick={() => setShowAuth(true)} className="text-[11px] text-slate-400 active:text-white transition-colors">Sign in</button>
+          )}
         </div>
       </div>
 
@@ -770,6 +1061,12 @@ export default function Home() {
           <HistoryScreen onSelect={handleHistorySelect} />
         ) : activeTab === "catalog" ? (
           <CatalogScreen />
+        ) : activeTab === "profile" ? (
+          <ProfileScreen
+            user={user}
+            onSignOut={async () => { await createClient().auth.signOut(); setUser(null); }}
+            onSignIn={() => setShowAuth(true)}
+          />
         ) : screen === "results" && analysis ? (
           <ResultsScreen
             analysis={analysis}
@@ -823,6 +1120,16 @@ export default function Home() {
           <DrinkSheet
             drink={selectedDrink}
             onClose={() => setSelectedDrink(null)}
+            user={user}
+            scanId={currentScanId}
+          />
+        )}
+
+        {/* Auth modal */}
+        {showAuth && (
+          <AuthModal
+            onClose={() => setShowAuth(false)}
+            onAuth={(u) => setUser(u)}
           />
         )}
       </div>
