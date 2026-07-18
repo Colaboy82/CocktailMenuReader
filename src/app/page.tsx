@@ -717,6 +717,8 @@ function ResultsScreen({
   });
   const [editingBar, setEditingBar] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveScanSuccess, setSaveScanSuccess] = useState(false);
+  const [saveScanError, setSaveScanError] = useState<string | null>(null);
 
   async function saveBarName() {
     if (!scanId || !barName.trim()) return;
@@ -729,9 +731,16 @@ function ResultsScreen({
   }
 
   async function handleSave() {
+    setSaveScanError(null);
     setIsSaving(true);
     try {
       await onSave();
+      setSaveScanSuccess(true);
+      // Auto navigate back after 1.5 seconds
+      setTimeout(() => onBack(), 1500);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save menu";
+      setSaveScanError(message);
     } finally {
       setIsSaving(false);
     }
@@ -788,21 +797,39 @@ function ResultsScreen({
 
       {/* Save/Discard buttons */}
       {user && (
-        <div className="px-5 pt-2 pb-2 flex-shrink-0 flex gap-2">
-          <button
-            onClick={() => onBack()}
-            disabled={isSaving}
-            className="flex-1 px-4 py-2.5 rounded-2xl bg-white/[0.05] text-slate-300 text-sm font-medium hover:bg-white/[0.08] active:bg-white/[0.1] disabled:opacity-50 transition"
-          >
-            Discard
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex-1 px-4 py-2.5 rounded-2xl bg-[var(--app-accent)] text-black text-sm font-medium hover:opacity-90 active:opacity-80 disabled:opacity-50 transition"
-          >
-            {isSaving ? "Saving..." : "Save"}
-          </button>
+        <div className="px-5 pt-2 pb-2 flex-shrink-0">
+          {saveScanSuccess ? (
+            <button
+              disabled
+              className="w-full px-4 py-2.5 rounded-2xl bg-[var(--app-mint)] text-black text-sm font-medium"
+            >
+              ✓ Saved
+            </button>
+          ) : (
+            <div className="space-y-2">
+              {saveScanError && (
+                <div className="px-3 py-2 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
+                  {saveScanError}
+                </div>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onBack()}
+                  disabled={isSaving}
+                  className="flex-1 px-4 py-2.5 rounded-2xl bg-white/[0.05] text-slate-300 text-sm font-medium hover:bg-white/[0.08] active:bg-white/[0.1] disabled:opacity-50 transition"
+                >
+                  Discard
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="flex-1 px-4 py-2.5 rounded-2xl bg-[var(--app-accent)] text-black text-sm font-medium hover:opacity-90 active:opacity-80 disabled:opacity-50 transition"
+                >
+                  {isSaving ? "Saving..." : "Save"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1197,24 +1224,18 @@ export default function Home() {
   async function saveScanToAccount(result: MenuAnalysis) {
     if (!user) { saveResult(result); return; }
     // Save to Supabase
-    try {
-      const now = new Date();
-      const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-      const defaultBarName = `${dateStr} menu`;
-      
-      const res = await fetch("/api/scans", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, scan: result, barName: defaultBarName }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save scan");
-      if (data.id) setCurrentScanId(data.id);
-    } catch (err) {
-      // Fallback to localStorage if Supabase save fails
-      console.error("Supabase save failed:", err);
-      saveResult(result);
-    }
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const defaultBarName = `${dateStr} menu`;
+    
+    const res = await fetch("/api/scans", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id, scan: result, barName: defaultBarName }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to save scan");
+    if (data.id) setCurrentScanId(data.id);
   }
 
   async function runAnalysis(text: string) {
