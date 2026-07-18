@@ -3,7 +3,7 @@ import { createServiceClient } from "@/lib/supabase-server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, cocktailName, stars, scanId } = await req.json();
+    const { userId, cocktailName, stars, scanId, style, taste, strength, similarDrinks, bottles, barName } = await req.json();
     if (!userId || !cocktailName || !stars) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
@@ -16,6 +16,12 @@ export async function POST(req: NextRequest) {
         stars,
         scan_id: scanId ?? null,
         rated_at: new Date().toISOString(),
+        style: style ?? null,
+        taste: taste ?? null,
+        strength: strength ?? null,
+        similar_drinks: similarDrinks ?? null,
+        bottles: bottles ?? null,
+        bar_name: barName ?? null,
       },
       { onConflict: "user_id,cocktail_name" },
     );
@@ -41,6 +47,12 @@ export async function GET(req: NextRequest) {
         stars,
         rated_at,
         scan_id,
+        style,
+        taste,
+        strength,
+        similar_drinks,
+        bottles,
+        bar_name,
         user_scans ( bar_name, items )
       `)
       .eq("user_id", userId)

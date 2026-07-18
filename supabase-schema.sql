@@ -36,6 +36,13 @@ create table if not exists user_ratings (
   stars         int not null check (stars between 1 and 5),
   scan_id       uuid references user_scans(id) on delete set null,
   rated_at      timestamptz default now(),
+  -- Store cocktail metadata to preserve it even without a saved scan
+  style         text,
+  taste         text,
+  strength      text,
+  similar_drinks text[],
+  bottles       text[],
+  bar_name      text,  -- optionally store bar context
   unique (user_id, cocktail_name)
 );
 

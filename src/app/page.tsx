@@ -205,6 +205,12 @@ type RatingRow = {
   stars: number;
   rated_at: string;
   scan_id: string | null;
+  style?: string | null;
+  taste?: string | null;
+  strength?: string | null;
+  similar_drinks?: string[] | null;
+  bottles?: string[] | null;
+  bar_name?: string | null;
   user_scans?: { bar_name: string | null; items: MenuItemAnalysis[] } | null;
 };
 
@@ -225,13 +231,27 @@ function ProfileScreen({ user, onSignOut, onSignIn, refreshKey, onRatingSaved }:
   function handleRatingTap(r: RatingRow) {
     const scan = r.user_scans;
     const drink = scan?.items?.find((i: MenuItemAnalysis) => i.name.toLowerCase() === r.cocktail_name.toLowerCase());
+    
+    // Try to get drink data from scan first, then fall back to rating data
     if (drink) {
-      setSelectedDrink({ drink, barName: scan?.bar_name ?? undefined });
+      setSelectedDrink({ 
+        drink, 
+        barName: r.bar_name ?? scan?.bar_name ?? undefined 
+      });
     } else {
-      // Fallback: construct minimal drink from rating data
+      // Construct drink from rating data (which includes style, taste, etc. if available)
       setSelectedDrink({
-        drink: { name: r.cocktail_name, style: "", taste: "", similarDrinks: [], bottles: [], confidence: 0, strength: "medium", aiGenerated: false },
-        barName: scan?.bar_name ?? undefined,
+        drink: { 
+          name: r.cocktail_name, 
+          style: r.style ?? "", 
+          taste: r.taste ?? "", 
+          similarDrinks: r.similar_drinks ?? [], 
+          bottles: r.bottles ?? [], 
+          confidence: 0, 
+          strength: r.strength ?? "medium", 
+          aiGenerated: false 
+        },
+        barName: r.bar_name ?? scan?.bar_name ?? undefined,
       });
     }
   }
@@ -398,7 +418,18 @@ function DrinkSheet({
       const res = await fetch("/api/ratings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id, cocktailName: drink.name, stars: rating, scanId }),
+        body: JSON.stringify({ 
+          userId: user.id, 
+          cocktailName: drink.name, 
+          stars: rating, 
+          scanId,
+          style: drink.style,
+          taste: drink.taste,
+          strength: drink.strength,
+          similarDrinks: drink.similarDrinks,
+          bottles: drink.bottles,
+          barName,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save rating");
