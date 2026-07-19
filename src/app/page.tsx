@@ -1048,9 +1048,11 @@ function HistoryScanItem({
 }) {
   const [swipeX, setSwipeX] = useState(0);
   const [startX, setStartX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   function handleTouchStart(e: React.TouchEvent) {
     setStartX(e.touches[0].clientX);
+    setIsDragging(true);
   }
 
   function handleTouchMove(e: React.TouchEvent) {
@@ -1062,6 +1064,7 @@ function HistoryScanItem({
   }
 
   function handleTouchEnd() {
+    setIsDragging(false);
     if (swipeX < -40) {
       setSwipeX(-80);
     } else {
@@ -1084,7 +1087,12 @@ function HistoryScanItem({
             onDelete();
           }}
           disabled={isDeleting}
-          className="absolute right-0 top-0 bottom-0 w-20 bg-red-500/80 hover:bg-red-600 text-white text-xs font-medium flex items-center justify-center disabled:opacity-50 transition"
+          className="absolute right-0 top-0 bottom-0 w-20 bg-red-500/80 hover:bg-red-600 text-white text-xs font-medium flex items-center justify-center disabled:opacity-50"
+          style={{
+            opacity: isDragging ? Math.min(1, Math.abs(swipeX) / 60) : 1,
+            transform: `scale(${isDragging ? 0.8 + Math.abs(swipeX) / 100 : 1})`,
+            transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
         >
           {isDeleting ? "..." : "Delete"}
         </button>
@@ -1092,8 +1100,11 @@ function HistoryScanItem({
       {/* Main content */}
       <button
         onClick={() => onSelect(scan)}
-        style={{ transform: `translateX(${swipeX}px)` }}
-        className="w-full text-left px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07] active:scale-[0.98] transition-transform will-change-transform"
+        style={{ 
+          transform: `translateX(${swipeX}px)`,
+          transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        }}
+        className="w-full text-left px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07] active:scale-[0.98] will-change-transform"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
