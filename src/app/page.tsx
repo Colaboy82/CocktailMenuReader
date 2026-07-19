@@ -707,7 +707,7 @@ function ResultsScreen({
 }: {
   analysis: MenuAnalysis;
   onBack: () => void;
-  onDrinkTap: (d: MenuItemAnalysis) => void;
+  onDrinkTap: (d: { drink: MenuItemAnalysis; barName: string }) => void;
   scanId: string | null;
   user: User | null;
   onSave: () => Promise<void>;
@@ -839,7 +839,7 @@ function ResultsScreen({
       {/* Scrollable cards */}
       <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-4 space-y-3">
         {analysis.items.map((item) => (
-          <DrinkCard key={item.name} drink={item} onTap={onDrinkTap} />
+          <DrinkCard key={item.name} drink={item} onTap={(d) => onDrinkTap({ drink: d, barName })} />
         ))}
 
         {/* Bottle references */}
@@ -1204,7 +1204,7 @@ export default function Home() {
   const [analysis, setAnalysis] = useState<MenuAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDrink, setSelectedDrink] = useState<MenuItemAnalysis | null>(null);
+  const [selectedDrink, setSelectedDrink] = useState<{ drink: MenuItemAnalysis; barName: string } | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [currentScanId, setCurrentScanId] = useState<string | null>(null);
@@ -1430,10 +1430,12 @@ export default function Home() {
         {/* Drink detail bottom sheet */}
         {selectedDrink && (
           <DrinkSheet
-            drink={selectedDrink}
+            drink={selectedDrink.drink}
             onClose={() => setSelectedDrink(null)}
             user={user}
             scanId={currentScanId}
+            barName={selectedDrink.barName}
+            onRatingSaved={() => setRefreshKey(prev => prev + 1)}
           />
         )}
 
