@@ -69,3 +69,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { scanId } = await req.json();
+    if (!scanId) return NextResponse.json({ error: "Missing scanId" }, { status: 400 });
+
+    const supabase = createServiceClient();
+    const { error } = await supabase
+      .from("user_scans")
+      .delete()
+      .eq("id", scanId);
+
+    if (error) throw error;
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[/api/scans DELETE] Error:", err);
+    const message = err instanceof Error ? err.message : "Unexpected error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

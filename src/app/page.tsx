@@ -1029,11 +1029,96 @@ function BottomNav({
   );
 }
 
+// ─── History scan item with swipe-to-delete ────────────────────────────────
+
+function HistoryScanItem({
+  scan,
+  dateStr,
+  isDeleting,
+  onSelect,
+  onDelete,
+  isCloudScan,
+}: {
+  scan: MenuAnalysis;
+  dateStr: string;
+  isDeleting: boolean;
+  onSelect: (scan: MenuAnalysis) => void;
+  onDelete?: () => Promise<void> | void;
+  isCloudScan: boolean;
+}) {
+  const [swipeX, setSwipeX] = useState(0);
+  const [startX, setStartX] = useState(0);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    setStartX(e.touches[0].clientX);
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    const currentX = e.touches[0].clientX;
+    const diff = currentX - startX;
+    if (diff < 0) {
+      setSwipeX(Math.max(diff, -80));
+    }
+  }
+
+  function handleTouchEnd() {
+    if (swipeX < -40) {
+      setSwipeX(-80);
+    } else {
+      setSwipeX(0);
+    }
+  }
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-3xl"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Delete button (shown on swipe) */}
+      {isCloudScan && onDelete && swipeX < -10 && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          disabled={isDeleting}
+          className="absolute right-0 top-0 bottom-0 w-20 bg-red-500/80 hover:bg-red-600 text-white text-xs font-medium flex items-center justify-center disabled:opacity-50 transition"
+        >
+          {isDeleting ? "..." : "Delete"}
+        </button>
+      )}
+      {/* Main content */}
+      <button
+        onClick={() => onSelect(scan)}
+        style={{ transform: `translateX(${swipeX}px)` }}
+        className="w-full text-left px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07] active:scale-[0.98] transition-transform will-change-transform"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white">
+              {(scan as MenuAnalysis & { barName?: string }).barName ? `📍 ${(scan as MenuAnalysis & { barName?: string }).barName}` : `Scanned ${dateStr}`}
+            </p>
+            <p className="text-xs text-slate-500 mt-1">{scan.items.length} drinks found</p>
+            <p className="text-xs text-slate-400 mt-1.5 line-clamp-2">
+              {scan.summary}
+            </p>
+          </div>
+          <span className="text-slate-500 text-xs mt-1">›</span>
+        </div>
+      </button>
+    </div>
+  );
+}
+
 // ─── History screen placeholder ───────────────────────────────────────────────
 
 function HistoryScreen({ onSelect, user, refreshKey }: { onSelect: (scan: MenuAnalysis) => void; user: User | null; refreshKey: number }) {
   const [cloudScans, setCloudScans] = useState<MenuAnalysis[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const localHistory = loadHistory();
 
   useEffect(() => {
@@ -1058,6 +1143,26 @@ function HistoryScreen({ onSelect, user, refreshKey }: { onSelect: (scan: MenuAn
   }, [user, refreshKey]);
 
   const history = user ? (cloudScans ?? []) : localHistory;
+
+  async function handleDeleteScan(scanId: string) {
+    setDeleteError(null);
+    setDeletingId(scanId);
+    try {
+      const res = await fetch("/api/scans", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scanId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete scan");
+      setCloudScans(prev => prev?.filter(s => s.id !== scanId) ?? null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to delete scan";
+      setDeleteError(message);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -1101,24 +1206,15 @@ function HistoryScreen({ onSelect, user, refreshKey }: { onSelect: (scan: MenuAn
           const dateStr = daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : `${daysAgo} days ago`;
 
           return (
-            <button
+            <HistoryScanItem
               key={savedAt}
-              onClick={() => onSelect(scan)}
-              className="w-full text-left px-4 py-4 rounded-3xl bg-white/[0.04] border border-white/[0.07] active:scale-[0.98] transition-transform"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">
-                    {(scan as MenuAnalysis & { barName?: string }).barName ? `📍 ${(scan as MenuAnalysis & { barName?: string }).barName}` : `Scanned ${dateStr}`}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">{scan.items.length} drinks found</p>
-                  <p className="text-xs text-slate-400 mt-1.5 line-clamp-2">
-                    {scan.summary}
-                  </p>
-                </div>
-                <span className="text-slate-500 text-xs mt-1">›</span>
-              </div>
-            </button>
+              scan={scan}
+              dateStr={dateStr}
+              isDeleting={deletingId === scan.id}
+              onSelect={onSelect}
+              onDelete={user && scan.id ? () => handleDeleteScan(scan.id!) : undefined}
+              isCloudScan={user !== null}
+            />
           );
         })}
         {!user && (
