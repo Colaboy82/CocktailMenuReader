@@ -262,7 +262,8 @@ function ProfileScreen({ user, onSignOut, onSignIn, refreshKey, onRatingSaved }:
     const styleMap: Record<string, number> = {};
     for (const r of ratings) {
       const scanDrink = r.user_scans?.items?.find((i: MenuItemAnalysis) => i.name.toLowerCase() === r.cocktail_name.toLowerCase());
-      const styleText = scanDrink?.style ?? cocktailProfiles.find(p => p.name.toLowerCase() === r.cocktail_name.toLowerCase())?.style ?? "";
+      // Try: scanned drink style → stored rating style → cocktail profiles → empty fallback
+      const styleText = scanDrink?.style ?? r.style ?? cocktailProfiles.find(p => p.name.toLowerCase() === r.cocktail_name.toLowerCase())?.style ?? "";
       const words = styleText.toLowerCase().split(/[\s·,]+/).filter((w: string) => w.length > 3);
       for (const w of words) {
         styleMap[w] = (styleMap[w] ?? 0) + r.stars;
