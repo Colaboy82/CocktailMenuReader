@@ -23,4 +23,5 @@ export type MenuAnalysis = {
   bottleMentions: BottleMention[];
   rawOcrText?: string;
   id?: string;  // Supabase scan ID, if loaded from database
+  barName?: string;  // Bar/restaurant name from saved scan
 };

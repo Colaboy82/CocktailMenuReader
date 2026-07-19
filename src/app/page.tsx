@@ -1043,10 +1043,11 @@ function HistoryScreen({ onSelect, user, refreshKey }: { onSelect: (scan: MenuAn
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) {
-          setCloudScans(data.map((row: { id: string; scanned_at: string; summary: string; items: MenuAnalysis["items"]; bottle_mentions: MenuAnalysis["bottleMentions"]; raw_ocr_text: string }) => ({
+          setCloudScans(data.map((row: { id: string; scanned_at: string; summary: string; bar_name: string | null; items: MenuAnalysis["items"]; bottle_mentions: MenuAnalysis["bottleMentions"]; raw_ocr_text: string }) => ({
             id: row.id,
             savedAt: new Date(row.scanned_at).getTime(),
             summary: row.summary,
+            barName: row.bar_name ?? undefined,
             items: row.items ?? [],
             bottleMentions: row.bottle_mentions ?? [],
             rawOcrText: row.raw_ocr_text,
@@ -1107,7 +1108,9 @@ function HistoryScreen({ onSelect, user, refreshKey }: { onSelect: (scan: MenuAn
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">Scanned {dateStr}</p>
+                  <p className="text-sm font-medium text-white">
+                    {(scan as MenuAnalysis & { barName?: string }).barName ? `📍 ${(scan as MenuAnalysis & { barName?: string }).barName}` : `Scanned ${dateStr}`}
+                  </p>
                   <p className="text-xs text-slate-500 mt-1">{scan.items.length} drinks found</p>
                   <p className="text-xs text-slate-400 mt-1.5 line-clamp-2">
                     {scan.summary}
