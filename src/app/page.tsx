@@ -331,8 +331,8 @@ function ProfileScreen({ user, onSignOut, onSignIn, refreshKey, onRatingSaved }:
                   >
                     <div className="flex-1 min-w-0 mr-3">
                       <p className="text-sm text-slate-200 truncate">{r.cocktail_name}</p>
-                      {r.user_scans?.bar_name && (
-                        <p className="text-[10px] text-slate-500 mt-0.5">📍 {r.user_scans.bar_name}</p>
+                      {(r.bar_name || r.user_scans?.bar_name) && (
+                        <p className="text-[10px] text-slate-500 mt-0.5">📍 {r.bar_name || r.user_scans?.bar_name}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
