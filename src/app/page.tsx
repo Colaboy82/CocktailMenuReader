@@ -224,10 +224,7 @@ function ProfileScreen({ user, onSignOut, onSignIn, refreshKey, onRatingSaved }:
     setLoading(true);
     fetch(`/api/ratings?userId=${user.id}`)
       .then(r => r.json())
-      .then(data => { 
-        console.log("Fetched ratings:", data);
-        if (Array.isArray(data)) setRatings(data); 
-      })
+      .then(data => { if (Array.isArray(data)) setRatings(data); })
       .finally(() => setLoading(false));
   }, [user, refreshKey]);
 
